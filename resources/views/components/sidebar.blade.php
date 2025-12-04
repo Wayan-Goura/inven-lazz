@@ -29,10 +29,10 @@
                 </li>
 
                 <li class="nav-item has-treeview 
-                    {{ request()->routeIs('barang.masuk') || request()->routeIs('barang.keluar') || request()->routeIs('barang.return') ? 'menu-open' : '' }}">
+                    {{ request()->routeIs('barang.masuk*') || request()->routeIs('barang.keluar*') || request()->routeIs('barang.return*') ? 'menu-open' : '' }}">
 
                     <a href="#" class="nav-link
-                        {{ request()->routeIs('barang.masuk') || request()->routeIs('barang.keluar') || request()->routeIs('barang.return') ? 'active' : '' }}">
+                        {{ request()->routeIs('barang.masuk*') || request()->routeIs('barang.keluar*') || request()->routeIs('barang.return*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-cogs"></i>
                         <p>
                             Kelola Barang
@@ -43,24 +43,24 @@
                     <ul class="nav nav-treeview">
 
                         <li class="nav-item">
-                            <a href="{{ route('barang.masuk') }}" 
-                               class="nav-link {{ request()->routeIs('barang.masuk') ? 'active' : '' }}">
+                            <a href="{{ route('barang.masuk.index') }}" 
+                            class="nav-link {{ request()->routeIs('barang.masuk*') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Barang Masuk</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('barang.keluar') }}" 
-                               class="nav-link {{ request()->routeIs('barang.keluar') ? 'active' : '' }}">
+                            <a href="{{ route('barang.keluar.index') }}" 
+                            class="nav-link {{ request()->routeIs('barang.keluar*') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Barang Keluar</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('barang.return') }}" 
-                               class="nav-link {{ request()->routeIs('barang.return') ? 'active' : '' }}">
+                            <a href="{{ route('barang.return.index') }}" 
+                            class="nav-link {{ request()->routeIs('barang.return*') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Barang Return</p>
                             </a>
@@ -68,6 +68,7 @@
 
                     </ul>
                 </li>
+
 
                 <li class="nav-item">
                     <a href="{{ route('toko') }}" 
