@@ -11,8 +11,12 @@
 
         <!-- Tombol kiri -->
         <div class="flex gap-2">
-            <a href="#" class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-md shadow">
+            <!-- Buka modal create -->
+            <a href="#" 
+                class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-md shadow"
+                onclick="openAddModal()">
                 + Tambah Barang Masuk
+                
             </a>
 
             <a href="#" class="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md shadow">
@@ -72,21 +76,11 @@
                     <td class="p-3 border text-center">15</td>
 
                     <td class="p-3 border text-center flex gap-2 justify-center">
-                        <a href="#" class="px-2 py-1 bg-blue-600 text-white rounded text-xs">Edit</a>
-                        <a href="#" class="px-2 py-1 bg-red-600 text-white rounded text-xs">Hapus</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td class="p-3 border text-center">1</td>
-                    <td class="p-3 border">BRG001</td>
-                    <td class="p-3 border">Helm slimehed Retro</td>
-                    <td class="p-3 border">Bogo</td>
-                    <td class="p-3 border">2025-01-10</td>
-                    <td class="p-3 border text-center">15</td>
-
-                    <td class="p-3 border text-center flex gap-2 justify-center">
-                        <a href="#" class="px-2 py-1 bg-blue-600 text-white rounded text-xs">Edit</a>
+                        <button 
+                            onclick="openModal('{{ route('barang.masuk.edit', ['id' => 1]) }}')" 
+                            class="px-2 py-1 bg-blue-600 text-white rounded text-xs">
+                            Edit
+                        </button>
                         <a href="#" class="px-2 py-1 bg-red-600 text-white rounded text-xs">Hapus</a>
                     </td>
                 </tr>
@@ -97,7 +91,45 @@
 
 </div>
 
+<!-- =====================
+     MODAL FORM
+=========================-->
+<div id="modalForm" 
+     class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+
+    <div class="bg-white p-5 rounded-lg shadow-lg w-[500px] max-h-[90vh] overflow-y-auto">
+
+        <!-- AJAX load content -->
+        <div id="modalContent"></div>
+
+        <div class="mt-4 text-right">
+            <button onclick="closeModal()" class="px-3 py-1 bg-gray-500 text-white rounded">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+
+{{-- JS Modal + Search --}}
 <script>
+function openModal(url) {
+    const modal = document.getElementById("modalForm");
+    const content = document.getElementById("modalContent");
+
+    modal.classList.remove("hidden");
+    content.innerHTML = "<p class='text-center py-5'>Loading...</p>";
+
+    fetch(url)
+        .then(res => res.text())
+        .then(html => content.innerHTML = html);
+}
+
+function closeModal() {
+    document.getElementById("modalForm").classList.add("hidden");
+    document.getElementById("modalContent").innerHTML = "";
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const searchInput = document.querySelector("[data-search]");
@@ -121,42 +153,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let show = true;
 
-            // SEARCH
             if (searchValue && !rowText.includes(searchValue)) show = false;
-
-            // FILTER TANGGAL
             if (tanggalValue === "today" && rowTanggal.toDateString() !== today.toDateString()) show = false;
             if (tanggalValue === "week" && rowTanggal < startOfWeek) show = false;
             if (tanggalValue === "month" && rowTanggal < startOfMonth) show = false;
-
-            // FILTER EXTRA
             if (extraValue && !rowText.includes(extraValue)) show = false;
 
             row.style.display = show ? "" : "none";
         });
     }
 
-    // Saat search → reset semua filter
     searchInput.addEventListener("input", () => {
         filterTanggal.value = "";
         filterExtra.value = "";
         filterTable();
     });
 
-    // Saat pilih filter tanggal → reset search & filter alasan
     filterTanggal.addEventListener("change", () => {
         searchInput.value = "";
         filterExtra.value = "";
         filterTable();
     });
 
-    // Saat pilih alasan → reset search & filter tanggal
     filterExtra.addEventListener("change", () => {
         searchInput.value = "";
         filterTanggal.value = "";
         filterTable();
     });
-
 });
 </script>
 
