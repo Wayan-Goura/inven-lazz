@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('barang_id')->constrained('data_barangs')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->dateTime('tanggal_retrun');
             $table->integer('jumlah_retrun');
             $table->string('deskripsi')->nullable();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
