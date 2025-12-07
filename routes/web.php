@@ -1,13 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DataBarangController;
 
 Route::get('/', fn() => view('dashboard'))->name('dashboard');
-Route::prefix('barang')->name('barang.')->group(function () {
-    Route::get('/', fn() => view('pages.barang.index'))->name('index');       // index.blade.php
-    Route::get('/create', fn() => view('pages.barang.create'))->name('create'); // create.blade.php
-    Route::get('/edit', fn() => view('pages.barang.edit'))->name('edit');       // edit.blade.php
-});
+Route::resource('barang', DataBarangController::class)->except(['show']);
 Route::prefix('barang')->name('barang.')->group(function () {
 
     // Barang Masuk
