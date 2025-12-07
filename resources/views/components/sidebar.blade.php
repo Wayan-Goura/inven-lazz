@@ -66,6 +66,14 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a href="{{ route('barang.catagory.index') }}"
+                            class="nav-link {{ request()->routeIs('barang.catagory*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Kategori</p>
+                            </a>
+                        </li>
+
                     </ul>
                 </li>
 
