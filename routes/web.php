@@ -28,6 +28,12 @@ Route::prefix('barang')->name('barang.')->group(function () {
         Route::get('/edit/{id}', fn($id) => view('pages.kel_barang.b_return.edit', compact('id')))->name('edit');
     });
 
+    Route::prefix('catagory')->name('catagory.')->group(function () {
+        Route::get('/', fn() => view('pages.kel_barang.catagory.index'))->name('index');
+        Route::get('/create', fn() => view('pages.kel_barang.catagory.create'))->name('create');
+        Route::get('/edit/{id}', fn($id) => view('pages.kel_barang.catagory.edit', compact('id')))->name('edit');
+    });
+
 });
 
 Route::get('/toko', fn() => view('pages.toko'))->name('toko');
