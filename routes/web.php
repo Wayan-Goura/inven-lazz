@@ -2,40 +2,59 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DataBarangController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TransaksiController;
 
+// 1. Core Routes
 Route::get('/', fn() => view('dashboard'))->name('dashboard');
-Route::resource('barang', DataBarangController::class)->except(['show']);
-Route::prefix('barang')->name('barang.')->group(function () {
+Route::get('/toko', fn() => view('pages.toko'))->name('toko');
+Route::get('/profile', fn() => view('pages.profile'))->name('profile');
+Route::get('/logout', fn() => "Logout berhasil (dummy).")->name('logout');
 
-    // Barang Masuk
-    Route::prefix('masuk')->name('masuk.')->group(function () {
-        Route::get('/', fn() => view('pages.kel_barang.b_masuk.index'))->name('index');
-        Route::get('/create', fn() => view('pages.kel_barang.b_masuk.create'))->name('create');
-        Route::get('/edit/{id}', fn($id) => view('pages.kel_barang.b_masuk.edit', compact('id')))->name('edit');
-    });
+// 2. DataBarang (Resource) Routes - hendel /barang, /barang/{id}/edit, etc.
+// nama prefix untuk barang: 'barang.'
+route::prefix('barang')->name('barang.')->group(function () {
+    Route::get('/', [DataBarangController::class, 'index'])->name('index');
+    Route::get('/create', [DataBarangController::class, 'create'])->name('create');
+    Route::post('/', [DataBarangController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [DataBarangController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [DataBarangController::class, 'update'])->name('update');
+    Route::delete('/{id}', [DataBarangController::class, 'destroy'])->name('destroy');
+});
+// Route::resource('barang', DataBarangController::class)->except(['show']);
 
-    // Barang Keluar
-    Route::prefix('keluar')->name('keluar.')->group(function () {
-        Route::get('/', fn() => view('pages.kel_barang.b_keluar.index'))->name('index');
-        Route::get('/create', fn() => view('pages.kel_barang.b_keluar.create'))->name('create');
-        Route::get('/edit/{id}', fn($id) => view('pages.kel_barang.b_keluar.edit', compact('id')))->name('edit');
-    });
+// 3. TRANSACTION Routes
+Route::prefix('transaksi')->name('transaksi.')->group(function () {
+    // New Transaction (was /barang/create)
+    Route::get('/create', fn() => view('pages.transaksi.create'))->name('create');
+    Route::post('/', [TransaksiController::class, 'store'])->name('store'); 
 
-    // Barang Return
+    // Existing/Specific Transaction Routes
+    Route::get('/edit/{id}', [TransaksiController::class, 'edit'])->name('edit'); 
+    Route::put('/update/{id}', [TransaksiController::class, 'update'])->name('update');
+
+    // b_keluar (List)
+    Route::get('/keluar', [TransaksiController::class, 'b_keluar'])->name('keluar.index');
+
+    // transaction views (like Masuk, Return)
+    Route::get('/masuk', fn() => view('pages.kel_barang.b_masuk.index'))->name('masuk.index');
+
     Route::prefix('return')->name('return.')->group(function () {
         Route::get('/', fn() => view('pages.kel_barang.b_return.index'))->name('index');
         Route::get('/create', fn() => view('pages.kel_barang.b_return.create'))->name('create');
         Route::get('/edit/{id}', fn($id) => view('pages.kel_barang.b_return.edit', compact('id')))->name('edit');
     });
-
-    Route::prefix('catagory')->name('catagory.')->group(function () {
-        Route::get('/', fn() => view('pages.kel_barang.catagory.index'))->name('index');
-        Route::get('/create', fn() => view('pages.kel_barang.catagory.create'))->name('create');
-        Route::get('/edit/{id}', fn($id) => view('pages.kel_barang.catagory.edit', compact('id')))->name('edit');
-    });
-
 });
 
-Route::get('/toko', fn() => view('pages.toko'))->name('toko');
-Route::get('/profile', fn() => view('pages.profile'))->name('profile');
-Route::get('/logout', fn() => "Logout berhasil (dummy).")->name('logout');
+// 4. Category Routes
+Route::prefix('barang')->name('barang.')->group(function () {
+    Route::prefix('catagory')->name('catagory.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::get('/{category}', [CategoryController::class, 'show'])->name('show');
+        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+    });
+});

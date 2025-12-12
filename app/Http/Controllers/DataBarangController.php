@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DataBarang;
-use App\Models\Category; // ⬅️ JANGAN LUPA IMPORT
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class DataBarangController extends Controller

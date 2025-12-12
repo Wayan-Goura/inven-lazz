@@ -12,7 +12,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Category::all();
+        return view('pages.kel_barang.catagory.index', compact('categories'));
     }
 
     /**
@@ -20,7 +21,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('pages.kel_barang.catagory.create');
     }
 
     /**
@@ -28,7 +29,14 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nama_category' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        Category::create($validated);
+
+        return redirect()->route('barang.catagory.index')->with('success', 'Category berhasil ditambahkan.');   
     }
 
     /**
@@ -36,7 +44,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
+        
     }
 
     /**
@@ -44,7 +52,7 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        //
+        return view('pages.kel_barang.catagory.edit', compact('category'));
     }
 
     /**
@@ -52,7 +60,14 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        //
+        $validated = $request->validate([
+            'nama_category' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $category->update($validated);
+
+        return redirect()->route('barang.catagory.index')->with('success', 'Category berhasil diperbarui.');
     }
 
     /**
@@ -60,6 +75,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $category->delete();
+        return redirect()->route('barang.catagory.index')->with('success', 'Category berhasil dihapus.');
     }
 }

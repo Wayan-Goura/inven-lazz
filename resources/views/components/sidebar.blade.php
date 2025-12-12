@@ -27,6 +27,14 @@
                         <p>Data Barang</p>
                     </a>
                 </li>
+                
+                <li class="nav-item">
+                    <a href="{{ route('transaksi.create') }}" 
+                       class="nav-link {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-box"></i>
+                        <p>Transaksi Barang</p>
+                    </a>
+                </li>
 
                 <li class="nav-item has-treeview 
                     {{ request()->routeIs('barang.masuk*') || request()->routeIs('barang.keluar*') || request()->routeIs('barang.return*') ? 'menu-open' : '' }}">
@@ -43,7 +51,7 @@
                     <ul class="nav nav-treeview">
 
                         <li class="nav-item">
-                            <a href="{{ route('barang.masuk.index') }}" 
+                            <a href="{{ route('barang.index') }}" 
                             class="nav-link {{ request()->routeIs('barang.masuk*') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Barang Masuk</p>
@@ -51,7 +59,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('barang.keluar.index') }}" 
+                            <a href="{{ route('barang.index') }}" 
                             class="nav-link {{ request()->routeIs('barang.keluar*') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Barang Keluar</p>
@@ -59,7 +67,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('barang.return.index') }}" 
+                            <a href="{{ route('barang.index') }}" 
                             class="nav-link {{ request()->routeIs('barang.return*') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Barang Return</p>
