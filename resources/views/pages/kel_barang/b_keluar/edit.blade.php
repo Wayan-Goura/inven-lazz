@@ -1,50 +1,91 @@
-<div id="modalEdit" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white w-96 max-h-[80vh] overflow-y-auto p-5 rounded-lg shadow-xl">
+@extends('layouts.app')
 
-        <h2 class="text-lg font-semibold mb-3">Edit Barang Keluar</h2>
+@section('content')
 
-        <form>
-            <input type="hidden" id="edit_id">
+<div class="container-fluid">
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Kode Barang</label>
-                <input id="edit_kode" type="text" class="w-full border p-2 rounded">
-            </div>
+    <!-- JUDUL -->
+    <h1 class="h3 mb-4 text-gray-800">Edit Barang Keluar</h1>
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Nama Barang</label>
-                <input id="edit_nama" type="text" class="w-full border p-2 rounded">
-            </div>
+    <div class="card shadow">
+        <div class="card-body">
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Merk</label>
-                <input id="edit_merk" type="text" class="w-full border p-2 rounded">
-            </div>
+            {{-- FORM EDIT --}}
+            <form action="#" method="post">
+                @csrf
+                @method('PUT')
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Tanggal</label>
-                <input id="edit_tanggal" type="date" class="w-full border p-2 rounded">
-            </div>
+                <div class="row">
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Lokasi</label>
-                <select id="edit_lokasi" class="w-full border p-2 rounded">
-                    <option value="Ubud">Ubud</option>
-                    <option value="Batubulan">Batubulan</option>
-                    <option value="Klungkung">Klungkung</option>
-                </select>
-            </div>
+                    <!-- KODE BARANG -->
+                    <div class="col-md-6 mb-3">
+                        <label>Kode Barang *</label>
+                        <input type="text" name="kode_barang"
+                               class="form-control"
+                               value="BRG001" required>
+                    </div>
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Jumlah</label>
-                <input id="edit_jumlah" type="number" class="w-full border p-2 rounded">
-            </div>
+                    <!-- NAMA BARANG -->
+                    <div class="col-md-6 mb-3">
+                        <label>Nama Barang *</label>
+                        <input type="text" name="nama_barang"
+                               class="form-control"
+                               value="Bolpoin Hitam" required>
+                    </div>
 
-            <div class="flex justify-end gap-2 mt-3">
-                <button type="button" onclick="closeModal('modalEdit')" class="px-3 py-1 bg-gray-400 text-white rounded">Batal</button>
-                <button class="px-3 py-1 bg-blue-600 text-white rounded">Update</button>
-            </div>
-        </form>
+                    <!-- MERK -->
+                    <div class="col-md-6 mb-3">
+                        <label>Merk *</label>
+                        <input type="text" name="merk"
+                               class="form-control"
+                               value="Standard" required>
+                    </div>
 
+                    <!-- TANGGAL -->
+                    <div class="col-md-6 mb-3">
+                        <label>Tanggal *</label>
+                        <input type="date" name="tanggal"
+                               class="form-control"
+                               value="2025-01-13" required>
+                    </div>
+
+                    <!-- LOKASI -->
+                    <div class="col-md-6 mb-3">
+                        <label>Lokasi *</label>
+                        <select name="lokasi" class="form-control">
+                            <option value="Ubud" selected>Ubud</option>
+                            <option value="Batubulan">Batubulan</option>
+                            <option value="Klungkung">Klungkung</option>
+                        </select>
+                    </div>
+
+                    <!-- JUMLAH -->
+                    <div class="col-md-6 mb-3">
+                        <label>Jumlah *</label>
+                        <input type="number" name="jumlah"
+                               class="form-control"
+                               value="20" required>
+                    </div>
+
+                </div>
+
+                <!-- BUTTON -->
+                <div class="mt-3">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update
+                    </button>
+
+                    <a href="{{ route('barang.keluar.index') }}"
+                       class="btn btn-secondary">
+                        Batal
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
     </div>
+
 </div>
+
+@endsection

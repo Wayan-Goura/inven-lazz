@@ -2,92 +2,110 @@
 
 @section('content')
 
-<div class="px-6 py-4">
+<div class="container-fluid">
 
-    <h1 class="text-2xl font-bold mb-4">Kategori</h1>
+    <!-- JUDUL -->
+    <h1 class="h3 mb-4 text-gray-800">Kategori</h1>
 
-    <!-- BARIS ATAS -->
-    <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+    <!-- BAR ATAS -->
+    <div class="card shadow mb-4">
+        <div class="card-body d-flex justify-content-between flex-wrap gap-2">
 
-        <!-- KIRI: tombol -->
-        <div class="flex gap-2">
-            <a href="#" class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-md shadow">
-                + Tambah Kategori
-            </a>
+            <!-- KIRI: TOMBOL -->
+            <div>
+                <a href="#" class="btn btn-sm btn-success">
+                    <i class="fas fa-plus"></i> Tambah Kategori
+                </a>
 
-            <a href="#" class="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md shadow">
-                Cetak PDF
-            </a>
+                <a href="#" class="btn btn-sm btn-primary ml-2">
+                    <i class="fas fa-file-pdf"></i> Cetak PDF
+                </a>
+            </div>
+
+            <!-- KANAN: SEARCH -->
+            <div>
+                <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    placeholder="Cari kategori..."
+                    style="width: 200px;"
+                    data-search
+                >
+            </div>
+
         </div>
-
-        <!-- KANAN: Search -->
-        <div class="flex gap-2">
-
-            <!-- Search -->
-            <input 
-                type="text"
-                placeholder="Cari kategori..."
-                class="px-3 py-1.5 border rounded-md text-sm w-48"
-                data-search
-            >
-        </div>
-
     </div>
 
-    <!-- TABEL DATA KATEGORI -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-        <table class="w-full border-collapse">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="p-3 border">No</th>
-                    <th class="p-3 border">Kode Kategori</th>
-                    <th class="p-3 border">Nama Kategori</th>
-                    <th class="p-3 border">Deskripsi</th>
-                    <th class="p-3 border text-center">Aksi</th>
-                </tr>
-            </thead>
+    <!-- TABEL -->
+    <div class="card shadow">
+        <div class="card-body table-responsive">
 
-            <tbody>
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="text-center" width="60">No</th>
+                        <th>Kode Kategori</th>
+                        <th>Nama Kategori</th>
+                        <th>Deskripsi</th>
+                        <th class="text-center" width="160">Aksi</th>
+                    </tr>
+                </thead>
 
-                <tr>
-                    <td class="p-3 border text-center">1</td>
-                    <td class="p-3 border">KAT001</td>
-                    <td class="p-3 border">Helm</td>
-                    <td class="p-3 border">Semua jenis helm (full face, half face, retro)</td>
-                    <td class="p-3 border text-center flex gap-2 justify-center">
-                        <a href="#" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Edit</a>
-                        <a href="#" class="px-3 py-1 bg-red-600 text-white rounded text-sm">Hapus</a>
-                    </td>
-                </tr>
+                <tbody>
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td>KAT001</td>
+                        <td>Helm</td>
+                        <td>Semua jenis helm (full face, half face, retro)</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-sm btn-info">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
 
-                <tr>
-                    <td class="p-3 border text-center">2</td>
-                    <td class="p-3 border">KAT002</td>
-                    <td class="p-3 border">Aksesoris Motor</td>
-                    <td class="p-3 border">Spion, lampu, aksesoris kecil motor</td>
-                    <td class="p-3 border text-center flex gap-2 justify-center">
-                        <a href="#" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Edit</a>
-                        <a href="#" class="px-3 py-1 bg-red-600 text-white rounded text-sm">Hapus</a>
-                    </td>
-                </tr>
+                    <tr>
+                        <td class="text-center">2</td>
+                        <td>KAT002</td>
+                        <td>Aksesoris Motor</td>
+                        <td>Spion, lampu, aksesoris kecil motor</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-sm btn-info">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
 
-                <tr>
-                    <td class="p-3 border text-center">3</td>
-                    <td class="p-3 border">KAT003</td>
-                    <td class="p-3 border">Oli Mesin</td>
-                    <td class="p-3 border">Oli motor berbagai merek</td>
-                    <td class="p-3 border text-center flex gap-2 justify-center">
-                        <a href="#" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">Edit</a>
-                        <a href="#" class="px-3 py-1 bg-red-600 text-white rounded text-sm">Hapus</a>
-                    </td>
-                </tr>
+                    <tr>
+                        <td class="text-center">3</td>
+                        <td>KAT003</td>
+                        <td>Oli Mesin</td>
+                        <td>Oli motor berbagai merek</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-sm btn-info">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
 
-            </tbody>
-        </table>
+            </table>
+
+        </div>
     </div>
 
 </div>
 
+{{-- JS SEARCH (TETAP, TIDAK DIHILANGKAN) --}}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 

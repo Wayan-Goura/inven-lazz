@@ -1,116 +1,81 @@
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
+<!-- Sidebar SB Admin 2 -->
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-    <a href="#" class="brand-link text-center">
-        <span class="brand-text font-weight-bold">STOK BARANG</span>
+    <!-- Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-cubes"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">STOK BARANG</div>
     </a>
 
-    <div class="sidebar">
+    <hr class="sidebar-divider my-0">
 
-        <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column"
-                data-widget="treeview"
-                role="menu"
-                data-accordion="false">
+    <!-- Dashboard -->
+    <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('dashboard') }}">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('dashboard') }}" 
-                       class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-home"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
+    <!-- Data Barang -->
+    <li class="nav-item {{ request()->routeIs('barang.index') && !request()->routeIs('barang.masuk*') && !request()->routeIs('barang.keluar*') && !request()->routeIs('barang.return*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('barang.index') }}">
+            <i class="fas fa-fw fa-boxes"></i>
+            <span>Data Barang</span>
+        </a>
+    </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('barang.index') }}" 
-                       class="nav-link {{ request()->routeIs('barang.*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-box"></i>
-                        <p>Data Barang</p>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('transaksi.create') }}" 
-                       class="nav-link {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-box"></i>
-                        <p>Transaksi Barang</p>
-                    </a>
-                </li>
+    <!-- Transaksi Barang -->
+    <li class="nav-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('transaksi.create') }}">
+            <i class="fas fa-fw fa-exchange-alt"></i>
+            <span>Transaksi Barang</span>
+        </a>
+    </li>
 
-                <li class="nav-item has-treeview 
-                    {{ request()->routeIs('barang.masuk*') || request()->routeIs('barang.keluar*') || request()->routeIs('barang.return*') ? 'menu-open' : '' }}">
+    <!-- Kelola Barang -->
+    <li class="nav-item">
+        @php
+            $openBarang = request()->routeIs('barang.masuk*') || request()->routeIs('barang.keluar*') || request()->routeIs('barang.return*') || request()->routeIs('barang.catagory*');
+        @endphp
+        <a class="nav-link collapsed {{ $openBarang ? '' : 'collapsed' }}" href="#" data-toggle="collapse" data-target="#collapseBarang" aria-expanded="{{ $openBarang ? 'true' : 'false' }}" aria-controls="collapseBarang">
+            <i class="fas fa-fw fa-cog"></i>
+            <span>Kelola Barang</span>
+        </a>
+        <div id="collapseBarang" class="collapse {{ $openBarang ? 'show' : '' }}" aria-labelledby="headingBarang" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item {{ request()->routeIs('barang.masuk*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Barang Masuk</a>
+                <a class="collapse-item {{ request()->routeIs('barang.keluar*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Barang Keluar</a>
+                <a class="collapse-item {{ request()->routeIs('barang.return*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Barang Return</a>
+                <a class="collapse-item {{ request()->routeIs('barang.catagory*') ? 'active' : '' }}" href="{{ route('barang.catagory.index') }}">Kategori</a>
+            </div>
+        </div>
+    </li>
 
-                    <a href="#" class="nav-link
-                        {{ request()->routeIs('barang.masuk*') || request()->routeIs('barang.keluar*') || request()->routeIs('barang.return*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-cogs"></i>
-                        <p>
-                            Kelola Barang
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
+    <!-- Kelola Toko -->
+    <li class="nav-item {{ request()->routeIs('toko') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('toko') }}">
+            <i class="fas fa-fw fa-store"></i>
+            <span>Kelola Toko</span>
+        </a>
+    </li>
 
-                    <ul class="nav nav-treeview">
+    <!-- Profil -->
+    <li class="nav-item {{ request()->routeIs('profile') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('profile') }}">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Profil</span>
+        </a>
+    </li>
 
-                        <li class="nav-item">
-                            <a href="{{ route('barang.index') }}" 
-                            class="nav-link {{ request()->routeIs('barang.masuk*') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Barang Masuk</p>
-                            </a>
-                        </li>
+    <!-- Logout -->
+    <li class="nav-item">
+        <a class="nav-link text-danger" href="{{ route('logout') }}">
+            <i class="fas fa-fw fa-sign-out-alt text-danger"></i>
+            <span class="text-danger">Logout</span>
+        </a>
+    </li>
 
-                        <li class="nav-item">
-                            <a href="{{ route('barang.index') }}" 
-                            class="nav-link {{ request()->routeIs('barang.keluar*') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Barang Keluar</p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{{ route('barang.index') }}" 
-                            class="nav-link {{ request()->routeIs('barang.return*') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Barang Return</p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{{ route('barang.catagory.index') }}"
-                            class="nav-link {{ request()->routeIs('barang.catagory*') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Kategori</p>
-                            </a>
-                        </li>
-
-                    </ul>
-                </li>
-
-
-                <li class="nav-item">
-                    <a href="{{ route('toko') }}" 
-                       class="nav-link {{ request()->routeIs('toko') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-store"></i>
-                        <p>Kelola Toko</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('profile') }}" 
-                       class="nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-user"></i>
-                        <p>Profil</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('logout') }}" class="nav-link text-danger">
-                        <i class="nav-icon fas fa-sign-out-alt text-danger"></i>
-                        <p class="text-danger">Logout</p>
-                    </a>
-                </li>
-
-            </ul>
-        </nav>
-
-    </div>
-</aside>
+</ul>

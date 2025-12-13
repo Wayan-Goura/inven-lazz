@@ -1,42 +1,45 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="px-6 py-6 max-w-3xl mx-auto">
+<div class="container-fluid">
 
-    <h1 class="text-3xl font-bold mb-6">Profil Saya</h1>
+    <h1 class="h3 mb-4 text-gray-800">Profil Saya</h1>
 
-    <!-- Card Profil -->
-    <div class="bg-white shadow rounded-lg p-6 flex flex-col md:flex-row items-center gap-6">
+    <!-- CARD PROFIL -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
 
-        <!-- Foto Profil -->
-        <div class="flex-shrink-0">
-            <img class="w-32 h-32 rounded-full border-2 border-gray-200"
-                 src="{{ asset('images/Lazz.jpeg') }}" 
-                 alt="Foto Profil">
-        </div>
+                <!-- FOTO -->
+                <div class="col-md-3 text-center">
+                    <img src="{{ asset('images/Lazz.jpeg') }}"
+                         class="img-fluid rounded-circle mb-3"
+                         style="max-width:150px;">
+                </div>
 
-        <!-- Info Profil -->
-        <div class="flex-1">
-            <h2 class="text-2xl font-semibold mb-2">Gudang Lazz Helmet</h2>
-            <p class="text-gray-600 mb-1"><strong>Email:</strong> example@email.com</p>
-            <p class="text-gray-600 mb-1"><strong>Telepon:</strong> +62 812-3456-7890</p>
-            <p class="text-gray-600 mb-1"><strong>Alamat:</strong> Jl. Raya Ubud No.12, Bali</p>
-            
-            <!-- Tombol Edit Profil -->
-            <div class="mt-4">
-                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                    Edit Profil
-                </button>
+                <!-- INFO -->
+                <div class="col-md-9">
+                    <h4 class="font-weight-bold">Gudang Lazz Helmet</h4>
+                    <p class="mb-1"><strong>Email:</strong> example@email.com</p>
+                    <p class="mb-1"><strong>Telepon:</strong> +62 812-3456-7890</p>
+                    <p class="mb-3"><strong>Alamat:</strong> Jl. Raya Ubud No.12, Bali</p>
+
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fas fa-user-edit"></i> Edit Profil
+                    </button>
+                </div>
+
             </div>
         </div>
-
     </div>
 
-    <!-- Section Aktivitas / Info Tambahan (opsional) -->
-    <div class="mt-8">
-        <h3 class="text-xl font-semibold mb-3">Info Tambahan</h3>
-        <div class="bg-gray-50 p-4 rounded shadow">
-            <p class="text-gray-600">Belum ada info tambahan.</p>
+    <!-- INFO TAMBAHAN -->
+    <div class="card shadow">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">Info Tambahan</h6>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-0">Belum ada info tambahan.</p>
         </div>
     </div>
 

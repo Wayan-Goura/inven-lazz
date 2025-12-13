@@ -1,48 +1,144 @@
-<div id="modalAdd" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white w-96 max-h-[80vh] overflow-y-auto p-5 rounded-lg shadow-xl">
+@extends('layouts.app')
+@section('content')
 
-        <h2 class="text-lg font-semibold mb-3">Tambah Barang Keluar</h2>
+<div class="container-fluid">
 
-        <form>
-            <div class="mb-3">
-                <label class="text-sm font-medium">Kode Barang</label>
-                <input type="text" class="w-full border p-2 rounded">
+    <!-- WRAPPER ISI -->
+    <div class="mx-auto" style="max-width: 900px;">
+
+        <div class="card shadow">
+
+            <!-- Header (FIXED) -->
+            <div class="card-header py-3 d-flex align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-box-open mr-2"></i> Input Barang
+                </h6>
             </div>
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Nama Barang</label>
-                <input type="text" class="w-full border p-2 rounded">
-            </div>
+            <form>
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Merk</label>
-                <input type="text" class="w-full border p-2 rounded">
-            </div>
+                <!-- BODY (SCROLLABLE) -->
+                <div class="card-body"
+                     style="
+                        max-height: calc(100vh - 260px);
+                        overflow-y: auto;
+                     ">
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Tanggal</label>
-                <input type="date" class="w-full border p-2 rounded">
-            </div>
+                    <div class="row">
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Lokasi</label>
-                <select class="w-full border p-2 rounded">
-                    <option value="Ubud">Ubud</option>
-                    <option value="Batubulan">Batubulan</option>
-                    <option value="Klungkung">Klungkung</option>
-                </select>
-            </div>
+                        <!-- Kode Barang -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Kode Barang <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control"
+                                       placeholder="Masukkan kode barang">
+                            </div>
+                        </div>
 
-            <div class="mb-3">
-                <label class="text-sm font-medium">Jumlah</label>
-                <input type="number" class="w-full border p-2 rounded">
-            </div>
+                        <!-- Nama Barang -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Nama Barang <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control"
+                                       placeholder="Masukkan nama barang">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Kategori
+                                </label>
+                                <select class="form-control">
+                                    <option value="">-- Pilih Kategori --</option>
+                                    <option>Helm</option>
+                                    <option>Kaca</option>
+                                    <option>Tali</option>
+                                </select>
+                            </div>
+                        </div>
 
-            <div class="flex justify-end gap-2 mt-3">
-                <button type="button" onclick="closeModal('modalAdd')" class="px-3 py-1 bg-gray-400 text-white rounded">Batal</button>
-                <button class="px-3 py-1 bg-green-600 text-white rounded">Simpan</button>
-            </div>
-        </form>
+                        <!-- Merk -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Merk
+                                </label>
+                                <input type="text" class="form-control"
+                                       placeholder="Merk barang">
+                            </div>
+                        </div>
+
+                        <!-- Tanggal -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Tanggal
+                                </label>
+                                <input type="date" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Lokasi -->
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Lokasi
+                                </label>
+                                <select class="form-control">
+                                    <option value="">-- Pilih Lokasi --</option>
+                                    <option>Ubud</option>
+                                    <option>Batubulan</option>
+                                    <option>Klungkung</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Jumlah -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Jumlah
+                                </label>
+                                <input type="number" class="form-control"
+                                       placeholder="Jumlah barang">
+                            </div>
+                        </div>
+
+                        <!-- Jenis Barang -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Jenis Barang
+                                </label>
+                                <select class="form-control">
+                                    <option value="">-- Pilih Jenis --</option>
+                                    <option>Barang Masuk</option>
+                                    <option>Barang Keluar</option>
+                                    <option>Barang Return</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Footer (FIXED) -->
+                <div class="card-footer bg-white d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i> Simpan
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
 
     </div>
+
 </div>
+
+@endsection

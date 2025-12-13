@@ -2,90 +2,119 @@
 
 @section('content')
 
-<div class="px-6 py-4">
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+</div>
 
-    <h1 class="text-2xl font-bold mb-2">Dashboard</h1>
-    <p class="text-gray-600 mb-6">Selamat datang di sistem stok barang.</p>
+<!-- Info Cards -->
+<div class="row">
 
-    <!-- BOX ATAS -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-        <!-- Barang Masuk -->
-        <div class="p-5 rounded-xl bg-purple-200 shadow">
-            <h3 class="text-lg font-semibold">Barang Masuk</h3>
-            <p class="text-3xl font-bold mt-2">1,240</p>
-            <p class="text-sm text-gray-700 mt-1">Total bulan ini</p>
-        </div>
-
-        <!-- Barang Keluar -->
-        <div class="p-5 rounded-xl bg-blue-200 shadow">
-            <h3 class="text-lg font-semibold">Barang Keluar</h3>
-            <p class="text-3xl font-bold mt-2">980</p>
-            <p class="text-sm text-gray-700 mt-1">Total bulan ini</p>
-        </div>
-
-        <!-- Barang Return -->
-        <div class="p-5 rounded-xl bg-green-200 shadow">
-            <h3 class="text-lg font-semibold">Barang Return</h3>
-            <p class="text-3xl font-bold mt-2">42</p>
-            <p class="text-sm text-gray-700 mt-1">Total bulan ini</p>
-        </div>
-
-        <!-- Stok Akhir -->
-        <div class="p-5 rounded-xl bg-yellow-200 shadow">
-            <h3 class="text-lg font-semibold">Stok Akhir</h3>
-            <p class="text-3xl font-bold mt-2">5,920</p>
-            <p class="text-sm text-gray-700 mt-1">Keseluruhan</p>
-        </div>
-
-    </div>
-
-    <!-- REGULAR SELL CHART -->
-    <div class="mt-8 bg-white p-6 rounded-xl shadow">
-        <div class="flex justify-between items-center">
-            <h2 class="text-xl font-semibold">Regular Sell</h2>
-            <button class="px-3 py-1 bg-green-500 text-white text-sm rounded-lg">Export</button>
-        </div>
-        <canvas id="regularSellChart" class="mt-4"></canvas>
-    </div>
-
-    <!-- MORE ANALYSIS -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-
-        <!-- Store Sell Ratio -->
-        <div class="p-5 bg-white shadow rounded-xl flex justify-between items-center">
-            <div>
-                <h4 class="text-lg font-semibold">Store Sell Ratio</h4>
-                <p class="text-sm text-gray-500">Analisis berdasarkan toko</p>
+    <!-- Barang Masuk -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                    Barang Masuk
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">1,240</div>
+                <small class="text-muted">Total bulan ini</small>
             </div>
-            <span class="text-gray-400 text-xl">&gt;</span>
         </div>
-
-        <!-- Top Item Sold -->
-        <div class="p-5 bg-white shadow rounded-xl flex justify-between items-center">
-            <div>
-                <h4 class="text-lg font-semibold">Top Item Sold</h4>
-                <p class="text-sm text-gray-500">Barang paling laris</p>
-            </div>
-            <span class="text-gray-400 text-xl">&gt;</span>
-        </div>
-
     </div>
 
-    <!-- DAILY MEETING -->
-    <div class="mt-6 bg-white shadow p-6 rounded-xl">
-        <h3 class="text-lg font-bold">Daily Meeting</h3>
-        <p class="text-sm text-gray-500">12 person • 08:30 PM</p>
-        <button class="mt-3 px-4 py-2 bg-black text-white rounded-lg">
-            Click for meeting link
-        </button>
+    <!-- Barang Keluar -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                    Barang Keluar
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">980</div>
+                <small class="text-muted">Total bulan ini</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barang Return -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                    Barang Return
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">42</div>
+                <small class="text-muted">Total bulan ini</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stok Akhir -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                    Stok Akhir
+                </div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">5,920</div>
+                <small class="text-muted">Keseluruhan</small>
+            </div>
+        </div>
     </div>
 
 </div>
 
-<!-- ChartJS CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chart -->
+<div class="row">
 
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Regular Sell</h6>
+                <button class="btn btn-sm btn-success">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+            <div class="card-body">
+                <canvas id="regularSellChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis -->
+    <div class="col-lg-4 mb-4">
+
+        <div class="card shadow mb-3">
+            <div class="card-body">
+                <h6 class="font-weight-bold">Store Sell Ratio</h6>
+                <p class="text-muted mb-0">Analisis berdasarkan toko</p>
+            </div>
+        </div>
+
+        <div class="card shadow">
+            <div class="card-body">
+                <h6 class="font-weight-bold">Top Item Sold</h6>
+                <p class="text-muted mb-0">Barang paling laris</p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Daily Meeting -->
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <h5 class="font-weight-bold">Daily Meeting</h5>
+        <p class="text-muted">12 person • 08:30 PM</p>
+        <a href="#" class="btn btn-dark btn-sm">
+            <i class="fas fa-video"></i> Meeting Link
+        </a>
+    </div>
+</div>
+
+<!-- ChartJS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('regularSellChart');
     new Chart(ctx, {
@@ -95,14 +124,13 @@
             datasets: [{
                 label: 'Penjualan',
                 data: [10, 22, 45, 30, 18, 40, 35],
-                borderWidth: 1
+                backgroundColor: '#4e73df'
             }]
         },
         options: {
+            maintainAspectRatio: false,
             scales: {
-                y: {
-                    beginAtZero: true
-                }
+                y: { beginAtZero: true }
             }
         }
     });

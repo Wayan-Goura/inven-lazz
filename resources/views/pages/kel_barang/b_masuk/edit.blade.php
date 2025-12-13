@@ -1,38 +1,74 @@
-<h2 class="text-xl font-bold mb-3">Edit Barang Masuk (ID: {{ $id }})</h2>
+<h5 class="mb-3 text-gray-800 font-weight-bold">
+    Edit Barang Masuk (ID: {{ $id }})
+</h5>
 
 <form>
 
-    <div class="mb-3">
-        <label class="block text-sm font-medium">Kode Barang</label>
-        <input type="text" class="w-full border rounded p-2" value="BRG001">
+    <div class="row">
+
+        <!-- KODE BARANG -->
+        <div class="col-md-6 mb-3">
+            <label>Kode Barang *</label>
+            <input type="text"
+                   class="form-control"
+                   value="BRG001">
+        </div>
+
+        <!-- NAMA BARANG -->
+        <div class="col-md-6 mb-3">
+            <label>Nama Barang *</label>
+            <input type="text"
+                   class="form-control"
+                   value="Helm Bogo Retro">
+        </div>
+
+        <!-- MERK -->
+        <div class="col-md-6 mb-3">
+            <label>Merk *</label>
+            <input type="text"
+                   class="form-control"
+                   value="Bogo">
+        </div>
+
+        <!-- KATEGORI -->
+        <div class="col-md-6 mb-3">
+            <label>Kategori *</label>
+            <select class="form-control">
+                <option value="">-- Pilih Kategori --</option>
+                <option value="Helm" selected>Helm</option>
+                <option value="Aksesoris">Aksesoris</option>
+                <option value="Oli">Oli</option>
+            </select>
+        </div>
+
+        <!-- TANGGAL -->
+        <div class="col-md-6 mb-3">
+            <label>Tanggal Masuk *</label>
+            <input type="date"
+                   class="form-control"
+                   value="2025-01-10">
+        </div>
+
+        <!-- JUMLAH -->
+        <div class="col-md-6 mb-3">
+            <label>Jumlah *</label>
+            <input type="number"
+                   class="form-control"
+                   value="15">
+        </div>
+
     </div>
 
-    <div class="mb-3">
-        <label class="block text-sm font-medium">Nama Barang</label>
-        <input type="text" class="w-full border rounded p-2" value="Helm Bogo Retro">
-    </div>
-
-    <div class="mb-3">
-        <label class="block text-sm font-medium">Merk</label>
-        <input type="text" class="w-full border rounded p-2" value="Bogo">
-    </div>
-
-    <div class="mb-3">
-        <label class="block text-sm font-medium">Tanggal Masuk</label>
-        <input type="date" class="w-full border rounded p-2" value="2025-01-10">
-    </div>
-
-    <div class="mb-3">
-        <label class="block text-sm font-medium">Jumlah</label>
-        <input type="number" class="w-full border rounded p-2" value="15">
-    </div>
-
-    <div class="flex justify-end gap-2 mt-4">
-        <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-500 text-white rounded">
+    <!-- BUTTON -->
+    <div class="text-right mt-3">
+        <button type="button"
+                onclick="closeModal()"
+                class="btn btn-secondary btn-sm">
             Batal
         </button>
 
-        <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded">
+        <button type="button"
+                class="btn btn-primary btn-sm">
             Update
         </button>
     </div>
