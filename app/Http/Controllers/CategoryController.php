@@ -36,16 +36,16 @@ class CategoryController extends Controller
 
         Category::create($validated);
 
-        return redirect()->route('barang.catagory.index')->with('success', 'Category berhasil ditambahkan.');   
+        return redirect()->route('kel_barang.catagory.index')->with('success', 'Category berhasil ditambahkan.');   
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
-    {
+    // public function show(Category $category)
+    // {
         
-    }
+    // }
 
     /**
      * Show the form for editing the specified resource.
@@ -67,7 +67,7 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return redirect()->route('barang.catagory.index')->with('success', 'Category berhasil diperbarui.');
+        return redirect()->route('kel_barang.catagory.index')->with('success', 'Category berhasil diperbarui.');
     }
 
     /**
@@ -76,6 +76,6 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
-        return redirect()->route('barang.catagory.index')->with('success', 'Category berhasil dihapus.');
+        return redirect()->route('kel_barang.catagory.index')->with('success', 'Category berhasil dihapus.');
     }
-}
+}   

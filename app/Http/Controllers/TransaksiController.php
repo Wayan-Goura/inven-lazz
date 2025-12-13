@@ -4,160 +4,198 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaksi;
 use App\Models\DataBarang;
+use App\Models\Category; // Diperlukan untuk fungsi create/index
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\User; // Diperlukan untuk fungsi edit (user_id)
 
 
 class TransaksiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // --- Index Functions (b_keluar, b_masuk) - Sudah benar ---
+   
     public function b_keluar()
     {
-
+        $categories = Category::all();
         $transaksis = Transaksi::with('user', 'detailTransaksis.barang')
-        ->where('tipe_transaksi', 'keluar')
-        ->paginate(10);
-        return view('pages.kel_barang.b_keluar.index', compact('transaksis'));
+            ->where('tipe_transaksi', 'keluar')
+            ->paginate(10);
+        return view('pages.kel_barang.b_keluar.index', compact('transaksis', 'categories'));
     }
+
     public function b_masuk()
     {
+        $categories = Category::all();
         $transaksis = Transaksi::with('user', 'detailTransaksis.barang')
-        ->where('tipe_transaksi', 'masuk')
-        ->paginate(10);
-        return view('pages.kel_barang.b_masuk.index', compact('transaksis'));
+            ->where('tipe_transaksi', 'masuk')
+            ->paginate(10);
+        return view('pages.kel_barang.b_masuk.index', compact('transaksis','categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // --- Create Function - Sudah benar ---
     public function create()
     {
+        
+        // $categories = Category::all();
         $barangs = DataBarang::all();
-        // tambahkan untuk mengambil data user nanti
         return view('pages.transaksi.create', compact('barangs'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created resource in storage (SATU ITEM PER TRANSAKSI).
      */
     public function store(Request $request)
     {
-        
-        // Validasi input
+        // dd($request->all());
+        $user_id_untuk_simpan = 1;
+        // 1. Validasi Input
         $request->validate([
             'kode_transaksi' => 'required|string|unique:transaksis,kode_transaksi',
             'tanggal_transaksi' => 'required|date',
-            'user_id' => 'required|exists:users,id',
-            'tipe_transaksi' => 'required|string',
-            'total_barang' => 'required|integer|min:1',
-            'detail_transaksis' => 'required|array|min:1',
-            'detail_transaksis.*.data_barang_id' => 'required|exists:data_barangs,id',
-            'detail_transaksis.*.jumlah' => 'required|integer|min:1',
+            // 'user_id' => 'required|exists:users,id',
+            'tipe_transaksi' => 'required|in:masuk,keluar',
+            'data_barang_id' => 'required|exists:data_barangs,id', // Input tunggal
+            'jumlah' => 'required|integer|min:1',                   // Input tunggal
         ]);
+
         try {
-            // Mulai transaksi database
-            \DB::beginTransaction();
+            DB::beginTransaction();
+            $jumlahBarang = (int) $request->jumlah;
+            $tipe = $request->tipe_transaksi;
+            
+            $transaksi = Transaksi::create([
+                'kode_transaksi' => $request->kode_transaksi,
+                'tanggal_transaksi' => $request->tanggal_transaksi,
+                'user_id' => $user_id_untuk_simpan,
+                'tipe_transaksi' => $request->tipe_transaksi,
+                'total_barang' => $jumlahBarang, 
+            ]);
 
-            $totalBarang = collect($request->input('detail_transaksis'))->sum('jumlah');
+            $transaksi->detailTransaksis()->create([
+                'data_barang_id' => $request->data_barang_id,
+                'jumlah' => $jumlahBarang,
+            ]);
 
-            // Buat transaksi utama
-            $transaksi = Transaksi::create($request->only([
-                'kode_transaksi' => $request->input('kode_transaksi'),
-                'tanggal_transaksi' => $request->input('tanggal_transaksi'),
-                'user_id' => $request->input('user_id'),
-                'tipe_transaksi' => $request->input('tipe_transaksi'),
-                'total_barang' => $totalBarang,
-            ]));
+            
+            $tipe = $request->tipe_transaksi;
+            $barang = DataBarang::find($request->data_barang_id);
 
-            // Buat detail transaksi
-            foreach ($request->input('detail_transaksis') as $detail) {
-                $transaksi->detailTransaksis()->create($detail);
+            if ($barang) {
+                if ($tipe == 'masuk') {
+                    $barang->increment('jml_stok', $jumlahBarang);
+
+                } elseif ($tipe == 'keluar') {
+                    // Pengecekan stok
+                    if ($barang->jml_stok < $jumlahBarang) {
+                        throw new \Exception("Stok barang {$barang->nama_barang} tidak mencukupi.");
+                    }
+                    $barang->decrement('jml_stok', $jumlahBarang);
+                }
+            } else {
+                throw new \Exception("Data barang tidak ditemukan.");
             }
 
-            // Commit transaksi database
-            \DB::commit();
+            
+            DB::commit();
 
-            return redirect()->route('transaksis.index')->with('success', 'Transaksi berhasil disimpan.');
+            if ($tipe == 'masuk') {
+                $redirectRoute = 'kel_barang.b_masuk.index'; // Ganti dengan nama route Barang Masuk Anda
+            } elseif ($tipe == 'keluar') {
+                $redirectRoute = 'Kel_barang.b_keluar.index'; // Ganti dengan nama route Barang Keluar Anda
+            } else {
+                $redirectRoute = 'home'; // Route fallback/default
+            }
+
+            // PERBAIKAN: Gunakan variabel tanpa tanda kutip
+            return redirect()->route($redirectRoute)->with('success', 'Transaksi berhasil disimpan.');
         } catch (\Exception $e) {
-            // Rollback transaksi database jika terjadi error
-            \DB::rollBack();
-            return back()->withErrors(['error' => 'Terjadi kesalahan saat menyimpan transaksi: ' . $e->getMessage()])->withInput();
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Gagal menyimpan transaksi: ' . $e->getMessage()])->withInput();
         }
-
     }
 
-    /**
-     * Display the specified resource.
-     */
-    // public function show(Transaksi $transaksi)
-    // {
-    //     //
-    // }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // --- Edit Function - Sudah benar ---
     public function edit(Transaksi $transaksi)
     {
-        // Memuat detail transaksi yang sudah ada dan semua data yang diperlukan
         $transaksi->load('detailTransaksis');
         $barangs = DataBarang::all();
-        $users = \App\Models\User::all();
+        // $users = User::all(); // Menggunakan use App\Models\User di atas
 
-        return view('transaksi.edit', compact('transaksi', 'barangs', 'users'));
+        $categories = Category::all();
+
+        return view('pages.transaksi.edit', compact('transaksi', 'barangs', 'users', 'categories'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource in storage (SATU ITEM PER TRANSAKSI).
      */
     public function update(Request $request, Transaksi $transaksi)
     {
         // 1. Validasi Data
         $request->validate([
-            // Pastikan kode_transaksi unik, kecuali untuk transaksi saat ini
             'kode_transaksi' => 'required|string|unique:transaksis,kode_transaksi,' . $transaksi->id,
             'tanggal_transaksi' => 'required|date',
             'user_id' => 'required|exists:users,id',
             'tipe_transaksi' => 'required|in:masuk,keluar',
-            'details' => 'required|array|min:1',
-            'details.*.data_barang_id' => 'required|exists:data_barangs,id',
-            'details.*.jumlah' => 'required|integer|min:1',
+            // Validasi tunggal
+            'data_barang_id' => 'required|exists:data_barangs,id',
+            'jumlah' => 'required|integer|min:1',
         ]);
 
         try {
-            // Menggunakan transaksi database
             DB::beginTransaction();
 
-            // 2. Hitung Total Barang baru
-            $totalBarang = collect($request->details)->sum('jumlah');
+            // --- UNDO STOK LAMA ---
+            $tipeLama = $transaksi->tipe_transaksi;
+            $detailLama = $transaksi->detailTransaksis->first(); // Ambil detail lama (hanya satu)
+            
+            if ($detailLama) {
+                $barangLama = DataBarang::find($detailLama->data_barang_id);
+                if ($barangLama) {
+                    if ($tipeLama == 'masuk') {
+                        $barangLama->decrement('jml_stok', $detailLama->jumlah); // UNDO: (-)
+                    } elseif ($tipeLama == 'keluar') {
+                        $barangLama->increment('jml_stok', $detailLama->jumlah); // UNDO: (+)
+                    }
+                }
+                // Hapus detail lama agar bisa diganti
+                $detailLama->delete();
+            }
+            
+            // --- REDO TRANSAKSI BARU ---
+            $jumlahBarangBaru = (int) $request->jumlah;
+            $tipeBaru = $request->tipe_transaksi;
 
-            // 3. Perbarui Transaksi Utama
+            // Perbarui Transaksi Utama
             $transaksi->update([
                 'kode_transaksi' => $request->kode_transaksi,
                 'tanggal_transaksi' => $request->tanggal_transaksi,
                 'user_id' => $request->user_id,
-                'tipe_transaksi' => $request->tipe_transaksi,
-                'total_barang' => $totalBarang,
+                'tipe_transaksi' => $tipeBaru,
+                'total_barang' => $jumlahBarangBaru,
             ]);
 
-            // 4. Hapus Detail Transaksi Lama
-            $transaksi->detailTransaksis()->delete();
+            // Buat Detail Transaksi Baru
+            $transaksi->detailTransaksis()->create([
+                'data_barang_id' => $request->data_barang_id,
+                'jumlah' => $jumlahBarangBaru,
+            ]);
 
-            // 5. Siapkan Data Detail Baru
-            $details = [];
-            foreach ($request->details as $detail) {
-                $details[] = [
-                    'data_barang_id' => $detail['data_barang_id'],
-                    'jumlah' => $detail['jumlah'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
+            // --- REDO STOK BARU ---
+            $barangBaru = DataBarang::find($request->data_barang_id);
+
+            if ($barangBaru) {
+                if ($tipeBaru == 'masuk') {
+                    $barangBaru->increment('jml_stok', $jumlahBarangBaru); // REDO: (+)
+                } elseif ($tipeBaru == 'keluar') {
+                    if ($barangBaru->jml_stok < $jumlahBarangBaru) {
+                        throw new \Exception("Stok barang {$barangBaru->nama_barang} tidak mencukupi untuk update.");
+                    }
+                    $barangBaru->decrement('jml_stok', $jumlahBarangBaru); // REDO: (-)
+                }
+            } else {
+                throw new \Exception("Data barang untuk update tidak ditemukan.");
             }
-
-            // 6. Simpan Detail Transaksi Baru
-            $transaksi->detailTransaksis()->createMany($details);
 
             DB::commit();
 
@@ -170,15 +208,31 @@ class TransaksiController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage (SATU ITEM PER TRANSAKSI).
      */
     public function destroy(Transaksi $transaksi)
     {
         try {
             DB::beginTransaction();
 
-            // Hapus semua detail transaksi terlebih dahulu
-            $transaksi->detailTransaksis()->delete();
+            $tipe = $transaksi->tipe_transaksi;
+            $detail = $transaksi->detailTransaksis->first(); // Ambil detail lama (hanya satu)
+
+            // --- UNDO STOK ---
+            if ($detail) {
+                $barang = DataBarang::find($detail->data_barang_id);
+
+                if ($barang) {
+                    if ($tipe == 'masuk') {
+                        $barang->decrement('jml_stok', $detail->jumlah); // UNDO: (-)
+                    } elseif ($tipe == 'keluar') {
+                        $barang->increment('jml_stok', $detail->jumlah); // UNDO: (+)
+                    }
+                }
+                
+                // Hapus detail setelah stok di-undo
+                $detail->delete(); 
+            }
 
             // Hapus Transaksi utama
             $transaksi->delete();
@@ -188,7 +242,7 @@ class TransaksiController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menghapus transaksi.');
+            return redirect()->back()->with('error', 'Gagal menghapus transaksi: ' . $e->getMessage());
         }
     }
 }

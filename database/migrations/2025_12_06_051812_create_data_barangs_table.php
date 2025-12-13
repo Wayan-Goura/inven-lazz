@@ -13,8 +13,10 @@ return new class extends Migration {
         Schema::create('data_barangs', function (Blueprint $table) {
             $table->id();
             $table->string('nama_barang');
+            $table->string ('merek');
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('k_barang')->unique();
+            $table->string('lokasi_gudang')->nullable();
             $table->integer('jml_stok');
             $table->timestamps();
         });

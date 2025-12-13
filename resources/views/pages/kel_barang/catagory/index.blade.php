@@ -7,13 +7,23 @@
     <!-- JUDUL -->
     <h1 class="h3 mb-4 text-gray-800">Kategori</h1>
 
+    <!-- ALERT SUCCESS -->
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    @endif
+
     <!-- BAR ATAS -->
     <div class="card shadow mb-4">
         <div class="card-body d-flex justify-content-between flex-wrap gap-2">
 
-            <!-- KIRI: TOMBOL -->
+            <!-- KIRI -->
             <div>
-                <a href="#" class="btn btn-sm btn-success">
+                <a href="{{ route('kel_barang.catagory.create') }}" class="btn btn-sm btn-success">
                     <i class="fas fa-plus"></i> Tambah Kategori
                 </a>
 
@@ -22,7 +32,7 @@
                 </a>
             </div>
 
-            <!-- KANAN: SEARCH -->
+            <!-- KANAN -->
             <div>
                 <input
                     type="text"
@@ -44,7 +54,6 @@
                 <thead class="thead-light">
                     <tr>
                         <th class="text-center" width="60">No</th>
-                        <th>Kode Kategori</th>
                         <th>Nama Kategori</th>
                         <th>Deskripsi</th>
                         <th class="text-center" width="160">Aksi</th>
@@ -52,50 +61,40 @@
                 </thead>
 
                 <tbody>
-                    <tr>
-                        <td class="text-center">1</td>
-                        <td>KAT001</td>
-                        <td>Helm</td>
-                        <td>Semua jenis helm (full face, half face, retro)</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-sm btn-info">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
+                    @forelse ($categories as $index => $category)
+                        <tr>
+                            <td class="text-center">
+                                {{ $index + 1 }}
+                            </td>
+                            <td>{{ $category->nama_category }}</td>
+                            <td>{{ $category->deskripsi ?? '-' }}</td>
+                            <td class="text-center">
 
-                    <tr>
-                        <td class="text-center">2</td>
-                        <td>KAT002</td>
-                        <td>Aksesoris Motor</td>
-                        <td>Spion, lampu, aksesoris kecil motor</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-sm btn-info">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
+                                <a href="{{ route('kel_barang.catagory.edit', $category->id) }}"
+                                   class="btn btn-sm btn-info">
+                                    <i class="fas fa-edit"></i>
+                                </a>
 
-                    <tr>
-                        <td class="text-center">3</td>
-                        <td>KAT003</td>
-                        <td>Oli Mesin</td>
-                        <td>Oli motor berbagai merek</td>
-                        <td class="text-center">
-                            <a href="#" class="btn btn-sm btn-info">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
+                                <form action="{{ route('kel_barang.catagory.destroy', $category->id) }}"
+                                      method="POST"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                Data kategori belum tersedia
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
 
             </table>
@@ -105,7 +104,7 @@
 
 </div>
 
-{{-- JS SEARCH (TETAP, TIDAK DIHILANGKAN) --}}
+{{-- JS SEARCH --}}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -124,5 +123,4 @@ document.addEventListener("DOMContentLoaded", function () {
     searchInput.addEventListener("input", filterTable);
 });
 </script>
-
 @endsection

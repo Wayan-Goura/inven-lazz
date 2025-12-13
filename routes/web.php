@@ -15,10 +15,12 @@ Route::get('/logout', fn() => "Logout berhasil (dummy).")->name('logout');
 // nama prefix untuk barang: 'barang.'
 route::prefix('barang')->name('barang.')->group(function () {
     Route::get('/', [DataBarangController::class, 'index'])->name('index');
+    Route::get('/', [DataBarangController::class, 'index'])->name('index');
     Route::get('/create', [DataBarangController::class, 'create'])->name('create');
     Route::post('/', [DataBarangController::class, 'store'])->name('store');
-    Route::get('/{id}/edit', [DataBarangController::class, 'edit'])->name('edit');
-    Route::put('/{id}', [DataBarangController::class, 'update'])->name('update');
+    Route::get('/barang/{barang}/edit', [DataBarangController::class, 'edit'])->name('barang.edit');
+    Route::put('/barang/{barang}', [DataBarangController::class, 'update'])
+        ->name('barang.update');
     Route::delete('/{id}', [DataBarangController::class, 'destroy'])->name('destroy');
     route::get('data-barang/pdf-mpdf', [DataBarangController::class, 'cetak_pdf'])->name('cetak_pdf');
 });
@@ -48,7 +50,7 @@ Route::prefix('transaksi')->name('transaksi.')->group(function () {
 });
 
 // 4. Category Routes
-Route::prefix('barang')->name('barang.')->group(function () {
+Route::prefix('kel_barang')->name('kel_barang.')->group(function () {
     Route::prefix('catagory')->name('catagory.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('index');
         Route::get('/create', [CategoryController::class, 'create'])->name('create');

@@ -4,29 +4,28 @@
 <div class="px-6 py-6 max-w-2xl mx-auto">
     <h1 class="text-2xl font-bold mb-6">Edit Barang</h1>
 
-    <form action="{{ route('barang.update', $barang->id) }}" method="POST">
+    <form action="{{route('barang.barang.update', $barang->id)}}" method="POST">
         @csrf
         @method('PUT')
 
-        <!-- Kode Barang -->
-        
         <!-- Nama Barang -->
-        <div>
+        <div class="mb-4">
             <label for="nama_barang" class="block mb-1 font-medium">Nama Barang</label>
             <input 
-            type="text" 
-            id="nama_barang"
-            name="nama_barang" 
+                type="text" 
+                id="nama_barang"
+                name="nama_barang" 
                 value="{{ old('nama_barang', $barang->nama_barang) }}" 
                 class="w-full border p-2 rounded @error('nama_barang') border-red-500 @enderror"
                 required
             >
             @error('nama_barang')
-            <span class="text-red-500 text-sm">{{ $message }}</span>
+                <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>
-        
-        <div>
+
+        <!-- Kode Barang -->
+        <div class="mb-4">
             <label for="k_barang" class="block mb-1 font-medium">Kode Barang</label>
             <input 
                 type="text" 
@@ -40,8 +39,25 @@
                 <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>
+
+        <!-- Merek -->
+        <div class="mb-4">
+            <label for="merek" class="block mb-1 font-medium">Merek</label>
+            <input 
+                type="text" 
+                id="merek"
+                name="merek" 
+                value="{{ old('merek', $barang->merek) }}" 
+                class="w-full border p-2 rounded @error('merek') border-red-500 @enderror"
+                required
+            >
+            @error('merek')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+
         <!-- Kategori -->
-        <div>
+        <div class="mb-4">
             <label for="category_id" class="block mb-1 font-medium">Kategori</label>
             <select 
                 id="category_id"
@@ -51,7 +67,7 @@
             >
                 <option value="">Pilih Kategori</option>
                 @foreach($categories as $category)
-                    <option value="{{ $category->id }}" 
+                    <option value="{{ $category->id }}"
                         {{ old('category_id', $barang->category_id) == $category->id ? 'selected' : '' }}>
                         {{ $category->nama_category }}
                     </option>
@@ -63,7 +79,7 @@
         </div>
 
         <!-- Stok -->
-        <div>
+        <div class="mb-6">
             <label for="jml_stok" class="block mb-1 font-medium">Jumlah Stok</label>
             <input 
                 type="number" 
@@ -80,13 +96,14 @@
         </div>
 
         <!-- Tombol -->
-        <div class="flex justify-end gap-2 pt-2">
+        <div class="flex justify-end gap-2">
             <a href="{{ route('barang.index') }}" 
-               class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition">
+               class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">
                 Batal
             </a>
+
             <button type="submit" 
-                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                 Update Barang
             </button>
         </div>

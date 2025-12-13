@@ -12,7 +12,7 @@ class BarangRetrunController extends Controller
      */
     public function index()
     {
-        //
+        
     }
 
     /**

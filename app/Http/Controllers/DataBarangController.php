@@ -41,6 +41,7 @@ class DataBarangController extends Controller
         // dd($request->all());
         $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
+            'merek' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'k_barang' => 'required|string|unique:data_barangs,k_barang',
             'jml_stok' => 'required|integer|min:0',
@@ -59,32 +60,37 @@ class DataBarangController extends Controller
     //     return view('barang.show', compact('dataBarang'));
     // }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(DataBarang $barang)
+    public function edit($id)
     {
-        // Typically, you need to pass categories to the edit view for a dropdown/select input
-        $categories = Category::all();
+        $barang = DataBarang::findOrFail($id);// 2. Ambil semua kategori untuk dropdown/select input di form
+        $categories = Category::all();// Pass instance DataBarang ($barang) dan daftar kategori ke view
         return view('pages.barang.edit', compact('barang', 'categories'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Memperbarui DataBarang tertentu di storage.
+     * Mengambil Request dan ID barang dari route parameter.
      */
-    public function update(Request $request, DataBarang $barang)
+    public function update(Request $request, $id)
     {
-        // Validation for update: k_barang must be unique, but ignore the current record's ID
+        // 1. Ambil data barang berdasarkan ID yang akan diperbarui.
+        $barang = DataBarang::findOrFail($id);
+
+        // 2. Validasi untuk update: k_barang harus unik,
+        //    tetapi abaikan record dengan ID saat ini ($barang->id)
         $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
+            'merek' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
+            // Perhatikan penggunaan $barang->id di sini untuk pengecualian unik
             'k_barang' => 'required|string|unique:data_barangs,k_barang,' . $barang->id,
             'jml_stok' => 'required|integer|min:0',
         ]);
 
-        // Update the model instance with validated data
+        // 3. Update model instance dengan data yang divalidasi
         $barang->update($validated);
 
+        // 4. Redirect ke halaman index dengan pesan sukses
         return redirect()->route('barang.index')->with('success', 'Barang berhasil diperbarui.');
     }
 

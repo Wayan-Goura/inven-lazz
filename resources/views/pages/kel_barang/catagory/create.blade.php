@@ -1,0 +1,74 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Tambah Category</h5>
+                </div>
+
+                <div class="card-body">
+                    <form action="{{ route('kel_barang.catagory.store') }}" method="POST">
+                        @csrf
+
+                        {{-- Nama Category --}}
+                        <div class="mb-3">
+                            <label for="nama_category" class="form-label">
+                                Nama Category <span class="text-danger">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                name="nama_category" 
+                                id="nama_category"
+                                class="form-control @error('nama_category') is-invalid @enderror"
+                                value="{{ old('nama_category') }}"
+                                placeholder="Masukkan nama category"
+                            >
+                            @error('nama_category')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        {{-- Deskripsi --}}
+                        <div class="mb-3">
+                            <label for="deskripsi" class="form-label">
+                                Deskripsi
+                            </label>
+                            <textarea 
+                                name="deskripsi" 
+                                id="deskripsi"
+                                rows="4"
+                                class="form-control @error('deskripsi') is-invalid @enderror"
+                                placeholder="Masukkan deskripsi (opsional)"
+                            >{{ old('deskripsi') }}</textarea>
+                            @error('deskripsi')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        {{-- Button --}}
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ route('kel_barang.catagory.index') }}" class="btn btn-secondary">
+                                Kembali
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                Simpan Category
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+@endsection

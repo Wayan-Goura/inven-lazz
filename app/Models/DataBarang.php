@@ -21,6 +21,7 @@ class DataBarang extends Model
      */
     protected $fillable = [
         'nama_barang',
+        'merek',
         'category_id',
         'k_barang',
         'jml_stok',
@@ -56,5 +57,10 @@ class DataBarang extends Model
     {
         return $this->hasMany(BarangRetrun::class, 'barang_id');
     }
+
+    // public function transaksis(): HasMany
+    // {
+    //     return $this->hasMany(Transaksi::class, 'data_barang_id');
+    // }
 
 }

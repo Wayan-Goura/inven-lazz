@@ -49,7 +49,7 @@
                 <a class="collapse-item {{ request()->routeIs('barang.masuk*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Barang Masuk</a>
                 <a class="collapse-item {{ request()->routeIs('barang.keluar*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Barang Keluar</a>
                 <a class="collapse-item {{ request()->routeIs('barang.return*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Barang Return</a>
-                <a class="collapse-item {{ request()->routeIs('barang.catagory*') ? 'active' : '' }}" href="{{ route('barang.catagory.index') }}">Kategori</a>
+                <a class="collapse-item {{ request()->routeIs('kel_barang.catagory*') ? 'active' : '' }}" href="{{ route('kel_barang.catagory.index') }}">Kategori</a>
             </div>
         </div>
     </li>

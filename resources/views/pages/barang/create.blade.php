@@ -14,6 +14,13 @@
                 <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>
+        <div>
+            <label class="block mb-1 font-medium">Merek</label>
+            <input type="text" name="merek" placeholder="Merek" class="w-full border p-2 rounded" required>
+            @error('merek')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
 
         <div>
             <label class="block mb-1 font-medium">Kategori</label>

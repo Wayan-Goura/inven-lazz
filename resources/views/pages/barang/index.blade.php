@@ -103,7 +103,7 @@
                                 {{ $barang->created_at->format('Y-m-d') }}
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('barang.edit', $barang->id) }}"
+                                <a href="{{ route('barang.barang.edit' , $barang->id)}}"
                                    class="btn btn-sm btn-warning mb-1">
                                     <i class="fas fa-edit"></i>
                                 </a>

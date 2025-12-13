@@ -12,7 +12,7 @@ class DetailTransaksi extends Model
     protected $table = 'detail_transaksis';
 
     protected $fillable = [
-        'transaksi_id',
+        'transaksi_id', 
         'data_barang_id', 
         'jumlah',
     ];
@@ -28,7 +28,7 @@ class DetailTransaksi extends Model
     /**
      * Relasi Belongs To
      */
-    public function barang()
+    public function databarangs()
     {
         return $this->belongsTo(DataBarang::class, 'data_barang_id');
     }
