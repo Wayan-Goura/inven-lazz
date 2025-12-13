@@ -20,6 +20,7 @@ route::prefix('barang')->name('barang.')->group(function () {
     Route::get('/{id}/edit', [DataBarangController::class, 'edit'])->name('edit');
     Route::put('/{id}', [DataBarangController::class, 'update'])->name('update');
     Route::delete('/{id}', [DataBarangController::class, 'destroy'])->name('destroy');
+    route::get('data-barang/pdf-mpdf', [DataBarangController::class, 'cetak_pdf'])->name('cetak_pdf');
 });
 // Route::resource('barang', DataBarangController::class)->except(['show']);
 

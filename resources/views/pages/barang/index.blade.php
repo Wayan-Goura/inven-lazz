@@ -19,7 +19,8 @@
                 + Tambah Barang
             </a>
 
-            <a href="#" class="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md shadow">
+            <a href="{{ route('barang.cetak_pdf') }}" 
+            target="_blank"  class="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md shadow hover:bg-indigo-700 transition duration-150">
                 Cetak PDF
             </a>
         </div>
@@ -45,8 +46,8 @@
             <thead>
                 <tr class="bg-gray-100">
                     <th class="p-3 border">No</th>
-                    <th class="p-3 border">Kode Barang</th>   <!-- k_barang -->
-                    <th class="p-3 border">Nama Barang</th>  <!-- nama_barang -->
+                    <th class="p-3 border">Kode Barang</th>   
+                    <th class="p-3 border">Nama Barang</th>  
                     <th class="p-3 border">Kategori</th>
                     <th class="p-3 border">Stok</th>
                     <th class="p-3 border">Tanggal Dibuat</th>
