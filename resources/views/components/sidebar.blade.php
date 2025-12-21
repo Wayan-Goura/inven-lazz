@@ -47,12 +47,32 @@
             <span>Kelola Barang</span>
         </a>
         <div id="collapseBarang" class="collapse {{ $openBarang ? 'show' : '' }}" aria-labelledby="headingBarang" data-parent="#accordionSidebar">
+            
             <div class="bg-white py-2 collapse-inner rounded">
-                <a class="collapse-item {{ request()->routeIs('barang.masuk*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Barang Masuk</a>
-                <a class="collapse-item {{ request()->routeIs('barang.keluar*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Barang Keluar</a>
-                <a class="collapse-item {{ request()->routeIs('barang.return*') ? 'active' : '' }}" href="{{ route('barang.index') }}">Barang Return</a>
-                <a class="collapse-item {{ request()->routeIs('kel_barang.catagory*') ? 'active' : '' }}" href="{{ route('kel_barang.catagory.index') }}">Kategori</a>
-            </div>
+
+            <a class="collapse-item {{ request()->routeIs('kel_barang.b_masuk.*') ? 'active' : '' }}"
+            href="{{ route('kel_barang.b_masuk.index') }}">
+            Barang Masuk
+            </a>
+
+            <a class="collapse-item {{ request()->routeIs('kel_barang.b_keluar.*') ? 'active' : '' }}"
+            href="{{ route('kel_barang.b_keluar.index') }}">
+            Barang Keluar
+            </a>
+
+            <a class="collapse-item {{ request()->routeIs('kel_barang.b_return.*') ? 'active' : '' }}"
+            href="{{ route('kel_barang.b_return.index') }}">
+            Barang Return
+            </a>
+
+
+            <a class="collapse-item {{ request()->routeIs('kel_barang.catagory.*') ? 'active' : '' }}"
+            href="{{ route('kel_barang.catagory.index') }}">
+                Kategori
+            </a>
+
+        </div>
+
         </div>
     </li>
 
