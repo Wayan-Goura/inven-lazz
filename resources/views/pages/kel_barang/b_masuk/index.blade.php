@@ -3,21 +3,16 @@
 @section('content')
 
 <div class="container-fluid">
-
     <h1 class="h3 mb-4 text-gray-800">Barang Masuk</h1>
 
-    <!-- TOP BAR -->
     <div class="card shadow mb-4">
         <div class="card-body d-flex justify-content-between flex-wrap gap-2">
-
-            <!-- KIRI -->
             <div>
                 <a href="#" class="btn btn-sm btn-secondary">
                     <i class="fas fa-file-pdf"></i> Cetak PDF
                 </a>
             </div>
 
-            <!-- KANAN -->
             <div class="d-flex gap-2">
                 <input type="text" class="form-control form-control-sm"
                        placeholder="Cari barang..." data-search>
@@ -30,49 +25,84 @@
                 </select>
 
                 <select class="form-control form-control-sm" data-filter-extra>
-                    <option value="">Katagori</option>
-                    <option value="helm">Helm</option>
-                    <option value="kaca">Kaca</option>
-                    <option value="tali">Tali</option>
+                    <option value="">Lokasi</option>
+                    <option value="ubud">Ubud</option>
+                    <option value="batubulan">Batubulan</option>
+                    <option value="klungkung">Klungkung</option>
                 </select>
             </div>
-
         </div>
     </div>
 
-    <!-- TABLE -->
     <div class="card shadow">
         <div class="card-body table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="thead-light">
                 <tr>
                     <th>No</th>
-                    <th>Kode</th>
-                    <th>Nama</th>
-                    <th>Merk</th>
-                    <th>Katagori</th>
-                    <th>Tanggal</th>
-                    <th class="text-center">Jumlah</th>
+                    <th>Kode Transaksi</th>
+                    <th>Tanggal Transaksi</th>
+                    <th>Nama Barang</th>
+                    <th>Merek</th>
+                    <th>Jumlah</th>
+                    <th>Sisa Stok</th>
+                    <th>Lokasi</th>
+                    <th>Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>BRG001</td>
-                    <td>Bolpoin Hitam</td>
-                    <td>Standard</td>
-                    <td>2025-01-13</td>
-                    <td>Ubud</td>
-                    <td class="text-center">20</td>
-                </tr>
-                </tbody>
+    @php $no = $transaksis->firstItem(); @endphp
+    @foreach ($transaksis as $item)
+        @foreach ($item->detailTransaksis as $detail)
+        <tr>
+            {{-- 1. Nomor urut --}}
+            <td>{{ $no++ }}</td>
+            
+            {{-- 2. Data dari Tabel Transaksi --}}
+            <td>{{ $item->kode_transaksi }}</td>
+            <td>{{ \Carbon\Carbon::parse($item->tanggal_transaksi)->format('d-m-Y') }}</td>
+            
+            {{-- 3. Data dari Tabel Barang (melalui Detail) --}}
+            <td>{{ $detail->barang->nama_barang ?? 'Barang Terhapus' }}</td>
+            <td>{{ $detail->barang->merek ?? '-' }}</td>
+            
+            {{-- 4. Jumlah Keluar --}}
+            <td class="text-center">
+                <span class="badge badge-danger">- {{ $detail->jumlah }}</span>
+            </td>
+            <td>{{ $detail->barang->jml_stok ?? '0' }}</td>
+            
+            {{-- 5. Lokasi Tujuan/Keluar --}}
+            <td>{{ $item->lokasi ?? '-' }}</td>
+
+            {{-- 6. Aksi --}}
+            <td class="text-center">
+                <a href="{{ route('transaksi.edit', $item->id) }}" class="btn btn-sm btn-warning">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <form action="{{ route('transaksi.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data transaksi ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                </form>
+            </td>
+        </tr>
+        @endforeach
+    @endforeach
+</tbody>
             </table>
+            
+            {{-- Tambahkan pagination link jika perlu --}}
+            @if(method_exists($transaksis, 'links'))
+                <div class="mt-3">
+                    {{ $transaksis->links() }}
+                </div>
+            @endif
         </div>
     </div>
-
 </div>
 
-{{-- JS TETAP --}}
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.querySelector("[data-search]");

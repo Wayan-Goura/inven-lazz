@@ -45,36 +45,51 @@
                     <th>Nama Barang</th>
                     <th>Merek</th>
                     <th>Jumlah</th>
+                    <th>Sisa Stok</th>
                     <th>Lokasi</th>
                     <th>Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
-                    @foreach ($transaksis as $index => $item)
-    @foreach ($item->detailTransaksis as $detail)
-    <tr>
-        <td>{{ $transaksis->firstItem() + $index }}</td>
-        <td>{{ $item->kode_transaksi ?? '—' }}</td>
-        <td>{{ $item->tanggal_transaksi ? \Carbon\Carbon::parse($item->tanggal_transaksi)->format('Y-m-d') : '—' }}</td>
-        <td>{{ $detail->barang->nama_barang ?? '—' }}</td>
-        <td>{{ $detail->barang->merek ?? '—' }}</td>
-        <td class="text-center">{{ $detail->jumlah ?? '—' }}</td>
-        <td>{{ $item->lokasi ?? '—' }}</td> {{-- if lokasi is in DataBarang --}}
-        <td class="text-center">
-            <a href="{{ route('transaksi.edit', $item->id) }}" class="btn btn-sm btn-warning mb-1">
-                <i class="fas fa-edit"></i>
-            </a>
-            <form action="{{ route('transaksi.destroy', $item->id) }}" method="POST" class="d-inline"
-                onsubmit="return confirm('Hapus transaksi ini?')">
-                @csrf
-                @method('DELETE')
-                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-            </form>
-        </td>
-    </tr>
+    @php $no = $transaksis->firstItem(); @endphp
+    @foreach ($transaksis as $item)
+        @foreach ($item->detailTransaksis as $detail)
+        <tr>
+            {{-- 1. Nomor urut --}}
+            <td>{{ $no++ }}</td>
+            
+            {{-- 2. Data dari Tabel Transaksi --}}
+            <td>{{ $item->kode_transaksi }}</td>
+            <td>{{ \Carbon\Carbon::parse($item->tanggal_transaksi)->format('d-m-Y') }}</td>
+            
+            {{-- 3. Data dari Tabel Barang (melalui Detail) --}}
+            <td>{{ $detail->barang->nama_barang ?? 'Barang Terhapus' }}</td>
+            <td>{{ $detail->barang->merek ?? '-' }}</td>
+            
+            {{-- 4. Jumlah Keluar --}}
+            <td class="text-center">
+                <span class="badge badge-danger">- {{ $detail->jumlah }}</span>
+            </td>
+            <td>{{ $detail->barang->jml_stok ?? '0' }}</td>
+            
+            {{-- 5. Lokasi Tujuan/Keluar --}}
+            <td>{{ $item->lokasi ?? '-' }}</td>
+
+            {{-- 6. Aksi --}}
+            <td class="text-center">
+                <a href="{{ route('transaksi.edit', $item->id) }}" class="btn btn-sm btn-warning">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <form action="{{ route('transaksi.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data transaksi ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                </form>
+            </td>
+        </tr>
+        @endforeach
     @endforeach
-@endforeach
-                </tbody>
+</tbody>
             </table>
             
             {{-- Tambahkan pagination link jika perlu --}}
