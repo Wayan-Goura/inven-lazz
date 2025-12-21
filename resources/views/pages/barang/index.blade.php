@@ -78,6 +78,7 @@
                             <th width="50">No</th>
                             <th>Kode Barang</th>
                             <th>Nama Barang</th>
+                            <th>Merek</th>
                             <th>Kategori</th>
                             <th width="80">Stok</th>
                             <th width="140">Tanggal</th>
@@ -93,6 +94,7 @@
                             </td>
                             <td>{{ $barang->k_barang }}</td>
                             <td>{{ $barang->nama_barang }}</td>
+                            <td>{{ $barang->merek }}</td>
                             <td data-category-id="{{ $barang->category_id ?? '' }}">
                                 {{ $barang->category->nama_category ?? '—' }}
                             </td>

@@ -129,6 +129,26 @@
                                 @enderror
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Lokasi <span class="text-danger">*</span>
+                                </label>
+                                <select 
+                                    name="lokasi" 
+                                    class="form-control @error('lokasi') is-invalid @enderror"
+                                    required
+                                >
+                                    <option value="">-- Pilih Lokasi --</option>
+                                    <option value="Jl. Melati No.10, Batubulan" {{ old('lokasi') == 'Jl. Melati No.10, Batubulan' ? 'selected' : '' }}>Jl. Melati No.10, Batubulan</option>
+                                    <option value="Jl. Kenanga No.5, Klungkung" {{ old('lokasi') == 'Jl. Kenanga No.5, Klungkung' ? 'selected' : '' }}>Jl. Kenanga No.5, Klungkung</option>
+                                    <option value="Jl. Anggrek No.7, Ubud" {{ old('lokasi') == 'Jl. Anggrek No.7, Ubud' ? 'selected' : '' }}>Jl. Anggrek No.7, Ubud</option>
+                                </select>
+                                @error('lokasi')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                         
                         </div>
                 </div>

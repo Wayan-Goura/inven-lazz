@@ -26,6 +26,7 @@
     
                 $table->enum('tipe_transaksi', ['masuk', 'keluar']);
                 $table->integer('total_barang');
+                $table->string ('lokasi', 255);
                 $table->timestamps();
             });
         }

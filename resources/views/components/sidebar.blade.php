@@ -13,10 +13,12 @@
 
     <!-- Dashboard -->
     <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+        @if (auth()->user()->role == 'superadmin')
         <a class="nav-link" href="{{ route('dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
+        @endif
     </li>
 
     <!-- Data Barang -->
@@ -68,6 +70,9 @@
             <i class="fas fa-fw fa-user"></i>
             <span>Profil</span>
         </a>
+    </li>
+    <li class="nav-item d-flex justify-content-center align-items-center">
+        <a>User Name: {{ auth()->user()->name }}</a>
     </li>
 
     <!-- Logout -->

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Transaksi;
+use App\Models\DataBarang;
 
 class DetailTransaksi extends Model
 {
@@ -28,7 +30,7 @@ class DetailTransaksi extends Model
     /**
      * Relasi Belongs To
      */
-    public function databarangs()
+    public function Barang()
     {
         return $this->belongsTo(DataBarang::class, 'data_barang_id');
     }

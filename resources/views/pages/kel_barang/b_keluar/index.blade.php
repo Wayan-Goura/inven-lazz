@@ -47,24 +47,48 @@
                 <thead class="thead-light">
                 <tr>
                     <th>No</th>
-                    <th>Kode</th>
-                    <th>Nama</th>
-                    <th>Merk</th>
-                    <th>Tanggal</th>
+                    <th>Kode Transaksi</th>
+                    <th>tanggal transaksi</th>
+                    <th>tipe_transaksi</th>
+                    <th>Nama Barang</th>
+                    <th>jumlah</th>
                     <th>Lokasi</th>
-                    <th class="text-center">Jumlah</th>
+                    <th>Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
+                    @foreach ($transaksi as $detail_transaksi => $b_masuk)
                 <tr>
-                    <td>1</td>
-                    <td>BRG001</td>
-                    <td>Bolpoin Hitam</td>
-                    <td>Standard</td>
-                    <td>2025-01-13</td>
-                    <td>Ubud</td>
-                    <td class="text-center">20</td>
+                    <td>{{ $transaksi->firstItem() + $detail_transaksi }}</td>
+                    <td>{{ $b_masuk->kode_transaksi }}</td>
+                    <td data-barang-id = "{{$b_masuk->$barang_id ??''}}" >{{ $b_masuk->k_barang }}</td>
+                    <td data-barang-id = "{{$b_masuk->$barang_id ??''}}" >{{ $b_masuk->nama_barang }}</td>
+                    <td data-barang-id = "{{$b_masuk->$barang_id ??''}}" >{{ $b_masuk->merek }}</td>
+                    <td class="text-center">
+                        {{ $b_masuk->created_at->format('Y-m-d') }}
+                    </td>
+                    <td >{{ $b_barang->jumlah }}</td>
+                    <td >{{ $b_barang->lokasi }}</td>
+                    <td class="text-center">
+                                <a href="{{ route('kel_barang.b_keluar.edit' , $barang->id)}}"
+                                   class="btn btn-sm btn-warning mb-1">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <form action="{{ route('kel_barang.b_keluar.destroy', $b_masuk->id) }}"
+                                      method="POST"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Hapus barang {{ $b_masuk->nama_barang }}?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                    {{-- <td class="text-center">20</td> --}}
                 </tr>
+                @endforeach
                 </tbody>
             </table>
         </div>
@@ -72,7 +96,6 @@
 
 </div>
 
-{{-- JS TETAP --}}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.querySelector("[data-search]");

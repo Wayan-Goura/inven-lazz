@@ -19,6 +19,7 @@ class Transaksi extends Model
         'user_id',
         'tipe_transaksi',
         'total_barang',
+        'lokasi',
     ];
 
     // Konversi tipe data

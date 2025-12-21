@@ -5,14 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Transaksi;
 use App\Models\DataBarang;
 use App\Models\Category; // Diperlukan untuk fungsi create/index
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\User; // Diperlukan untuk fungsi edit (user_id)
+use App\Models\DetailTransaksi;
+use App\Models\User; 
 
 
 class TransaksiController extends Controller
 {
-    // --- Index Functions (b_keluar, b_masuk) - Sudah benar ---
+    // Index Functions (b_keluar, b_masuk) 
    
     public function b_keluar()
     {
@@ -47,30 +49,39 @@ class TransaksiController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
-        $user_id_untuk_simpan = 1;
-        // 1. Validasi Input
-        $request->validate([
+        $validated = $request->validate([
             'kode_transaksi' => 'required|string|unique:transaksis,kode_transaksi',
             'tanggal_transaksi' => 'required|date',
-            // 'user_id' => 'required|exists:users,id',
             'tipe_transaksi' => 'required|in:masuk,keluar',
-            'data_barang_id' => 'required|exists:data_barangs,id', // Input tunggal
-            'jumlah' => 'required|integer|min:1',                   // Input tunggal
+            'data_barang_id' => 'required|exists:data_barangs,id',
+            'jumlah' => 'required|integer|min:1',
+            'lokasi' => 'required|string',
         ]);
 
         try {
             DB::beginTransaction();
+
+            $auth = auth()->user()->id;
+            $barang = DataBarang::findOrFail($request->data_barang_id);
             $jumlahBarang = (int) $request->jumlah;
             $tipe = $request->tipe_transaksi;
-            
+
+            // Cek stok khusus barang keluar
+            if ($tipe == 'keluar' && $barang->jml_stok < $jumlahBarang) {
+                throw new Exception("Stok barang {$barang->nama_barang} tidak mencukupi. Sisa stok: {$barang->jml_stok}.");
+            }
+
+            // Simpan Transaksi Utama
             $transaksi = Transaksi::create([
-                'kode_transaksi' => $request->kode_transaksi,
-                'tanggal_transaksi' => $request->tanggal_transaksi,
-                'user_id' => $user_id_untuk_simpan,
-                'tipe_transaksi' => $request->tipe_transaksi,
-                'total_barang' => $jumlahBarang, 
+                'kode_transaksi' => $validated['kode_transaksi'],
+                'tanggal_transaksi' => $validated['tanggal_transaksi'],
+                'user_id' => auth()->user()->id,
+                'tipe_transaksi' => $tipe,
+                'total_barang' => $jumlahBarang,
+                'lokasi' => $validated['lokasi']
             ]);
 
+            // 4. Simpan Detail Transaksi
             $transaksi->detailTransaksis()->create([
                 'data_barang_id' => $request->data_barang_id,
                 'jumlah' => $jumlahBarang,
@@ -80,64 +91,56 @@ class TransaksiController extends Controller
             $tipe = $request->tipe_transaksi;
             $barang = DataBarang::find($request->data_barang_id);
 
-            if ($barang) {
-                if ($tipe == 'masuk') {
-                    $barang->increment('jml_stok', $jumlahBarang);
-
-                } elseif ($tipe == 'keluar') {
-                    // Pengecekan stok
-                    if ($barang->jml_stok < $jumlahBarang) {
-                        throw new \Exception("Stok barang {$barang->nama_barang} tidak mencukupi.");
-                    }
-                    $barang->decrement('jml_stok', $jumlahBarang);
-                }
+            if ($tipe == 'masuk') {
+                $barang->increment('jml_stok', $jumlahBarang);
             } else {
-                throw new \Exception("Data barang tidak ditemukan.");
+                $barang->decrement('jml_stok', $jumlahBarang);
             }
+            // if ($barang) {
+            //     if ($tipe == 'masuk') {
+            //         $barang->increment('jml_stok', $jumlahBarang);
+
+            //     } elseif ($tipe == 'keluar') {
+            //         // Pengecekan stok
+            //         if ($barang->jml_stok < $jumlahBarang) {
+            //             throw new Exception("Stok barang {$barang->nama_barang} tidak mencukupi.");
+            //         }
+            //         $barang->decrement('jml_stok', $jumlahBarang);
+            //     }
+            // } else {
+            //     throw new Exception("Data barang tidak ditemukan.");
+            // }
 
             
             DB::commit();
 
-            if ($tipe == 'masuk') {
-                $redirectRoute = 'kel_barang.b_masuk.index'; // Ganti dengan nama route Barang Masuk Anda
-            } elseif ($tipe == 'keluar') {
-                $redirectRoute = 'Kel_barang.b_keluar.index'; // Ganti dengan nama route Barang Keluar Anda
-            } else {
-                $redirectRoute = 'home'; // Route fallback/default
-            }
+            $redirectRoute =$tipe == 'masuk' 
+            ? 'kel_barang.b_masuk.index'
+            : 'kel_barang.b_keluar.index';
 
-            // PERBAIKAN: Gunakan variabel tanpa tanda kutip
-            return redirect()->route($redirectRoute)->with('success', 'Transaksi berhasil disimpan.');
-        } catch (\Exception $e) {
+                // if ($tipe == 'masuk') {
+                //     $redirectRoute = 'kel_barang.b_masuk.index'; // Ganti dengan nama route Barang Masuk Anda
+                // } elseif ($tipe == 'keluar') {
+                //     $redirectRoute = 'Kel_barang.b_keluar.index'; // Ganti dengan nama route Barang Keluar Anda
+                // } else {
+                //     $redirectRoute = 'home'; 
+                // }
+
+            return redirect()->route($redirectRoute)->with('success', 'Transaksi berhasil disimpan.');        } catch (Exception $e) {
             DB::rollBack();
+            dd($e->getMessage());
             return back()->withErrors(['error' => 'Gagal menyimpan transaksi: ' . $e->getMessage()])->withInput();
         }
     }
 
     // --- Edit Function - Sudah benar ---
-    public function edit(Transaksi $transaksi)
-    {
-        $transaksi->load('detailTransaksis');
-        $barangs = DataBarang::all();
-        // $users = User::all(); // Menggunakan use App\Models\User di atas
-
-        $categories = Category::all();
-
-        return view('pages.transaksi.edit', compact('transaksi', 'barangs', 'users', 'categories'));
-    }
-
-    /**
-     * Update the specified resource in storage (SATU ITEM PER TRANSAKSI).
-     */
     public function update(Request $request, Transaksi $transaksi)
     {
-        // 1. Validasi Data
         $request->validate([
             'kode_transaksi' => 'required|string|unique:transaksis,kode_transaksi,' . $transaksi->id,
             'tanggal_transaksi' => 'required|date',
             'user_id' => 'required|exists:users,id',
             'tipe_transaksi' => 'required|in:masuk,keluar',
-            // Validasi tunggal
             'data_barang_id' => 'required|exists:data_barangs,id',
             'jumlah' => 'required|integer|min:1',
         ]);
@@ -145,65 +148,59 @@ class TransaksiController extends Controller
         try {
             DB::beginTransaction();
 
-            // --- UNDO STOK LAMA ---
-            $tipeLama = $transaksi->tipe_transaksi;
-            $detailLama = $transaksi->detailTransaksis->first(); // Ambil detail lama (hanya satu)
-            
+            // 1. Ambil data lama & Undo stok
+            $detailLama = $transaksi->detailTransaksis()->first();
             if ($detailLama) {
                 $barangLama = DataBarang::find($detailLama->data_barang_id);
                 if ($barangLama) {
-                    if ($tipeLama == 'masuk') {
-                        $barangLama->decrement('jml_stok', $detailLama->jumlah); // UNDO: (-)
-                    } elseif ($tipeLama == 'keluar') {
-                        $barangLama->increment('jml_stok', $detailLama->jumlah); // UNDO: (+)
+                    if ($transaksi->tipe_transaksi == 'masuk') {
+                        $barangLama->decrement('jml_stok', $detailLama->jumlah);
+                    } else {
+                        $barangLama->increment('jml_stok', $detailLama->jumlah);
                     }
                 }
-                // Hapus detail lama agar bisa diganti
-                $detailLama->delete();
+                $detailLama->delete(); // Hapus detail lama
             }
-            
-            // --- REDO TRANSAKSI BARU ---
-            $jumlahBarangBaru = (int) $request->jumlah;
+
+            // 2. Siapkan data baru
+            $barangBaru = DataBarang::findOrFail($request->data_barang_id);
+            $jumlahBaru = (int) $request->jumlah;
             $tipeBaru = $request->tipe_transaksi;
 
-            // Perbarui Transaksi Utama
+            // 3. Validasi stok baru jika tipenya 'keluar'
+            if ($tipeBaru == 'keluar' && $barangBaru->jml_stok < $jumlahBaru) {
+                throw new Exception("Update Gagal: Stok {$barangBaru->nama_barang} tidak mencukupi.");
+            }
+
+            // 4. Update Header & Detail Baru
             $transaksi->update([
                 'kode_transaksi' => $request->kode_transaksi,
                 'tanggal_transaksi' => $request->tanggal_transaksi,
                 'user_id' => $request->user_id,
                 'tipe_transaksi' => $tipeBaru,
-                'total_barang' => $jumlahBarangBaru,
+                'total_barang' => $jumlahBaru,
             ]);
 
-            // Buat Detail Transaksi Baru
             $transaksi->detailTransaksis()->create([
-                'data_barang_id' => $request->data_barang_id,
-                'jumlah' => $jumlahBarangBaru,
+                'data_barang_id' => $barangBaru->id,
+                'jumlah' => $jumlahBaru,
             ]);
 
-            // --- REDO STOK BARU ---
-            $barangBaru = DataBarang::find($request->data_barang_id);
-
-            if ($barangBaru) {
-                if ($tipeBaru == 'masuk') {
-                    $barangBaru->increment('jml_stok', $jumlahBarangBaru); // REDO: (+)
-                } elseif ($tipeBaru == 'keluar') {
-                    if ($barangBaru->jml_stok < $jumlahBarangBaru) {
-                        throw new \Exception("Stok barang {$barangBaru->nama_barang} tidak mencukupi untuk update.");
-                    }
-                    $barangBaru->decrement('jml_stok', $jumlahBarangBaru); // REDO: (-)
-                }
+            // 5. Update Stok Akhir
+            if ($tipeBaru == 'masuk') {
+                $barangBaru->increment('jml_stok', $jumlahBaru);
             } else {
-                throw new \Exception("Data barang untuk update tidak ditemukan.");
+                $barangBaru->decrement('jml_stok', $jumlahBaru);
             }
 
             DB::commit();
 
-            return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil diperbarui!');
+            $route = ($tipeBaru == 'masuk') ? 'kel_barang.b_masuk.index' : 'kel_barang.b_keluar.index';
+            return redirect()->route($route)->with('success', 'Transaksi berhasil diperbarui.');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', 'Gagal memperbarui transaksi: ' . $e->getMessage());
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
     }
 
@@ -240,7 +237,7 @@ class TransaksiController extends Controller
             DB::commit();
             return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil dihapus.');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal menghapus transaksi: ' . $e->getMessage());
         }
