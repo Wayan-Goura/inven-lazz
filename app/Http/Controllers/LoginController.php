@@ -17,17 +17,17 @@ class LoginController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+    $request->session()->regenerate();
 
-            $user = Auth::user();
+    $user = Auth::user();
 
-            // LOGIKA REDIRECT BERDASARKAN ROLE
-            if ($user->role == 'superadmin') {
-                return redirect()->route('dashboard'); // Admin ke Dashboard Utama
-            } else {
-                return redirect()->route('kel_barang.b_masuk.index'); 
-            }
-        }
+    if ($user->role === 'super_admin') {
+        return redirect()->route('dashboard');
+    }
+
+    return redirect()->route('kel_barang.b_masuk.index');
+}
+
 
         return back()->withErrors(['email' => 'Email atau password salah.']);
     }

@@ -56,11 +56,11 @@
         </div>
     </li>
 
-    <!-- Kelola Toko -->
-    <li class="nav-item {{ request()->routeIs('toko') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('toko') }}">
+    <!-- Kelola Admin -->
+    <li class="nav-item {{ request()->routeIs('kel_role.*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('kel_role.index') }}">
             <i class="fas fa-fw fa-store"></i>
-            <span>Kelola Toko</span>
+            <span>Kelola Admin</span>
         </a>
     </li>
 
