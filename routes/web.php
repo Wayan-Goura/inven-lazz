@@ -86,6 +86,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/edit/{id}', [TransaksiController::class, 'edit'])->name('edit');
             Route::put('/update/{id}', [TransaksiController::class, 'update'])->name('update');
             Route::delete('/{id}', [TransaksiController::class, 'destroy'])->name('destroy');
+            Route::get('/generate-code', [TransaksiController::class, 'getGenerateCode'])->name('generate-code');
         });
 
         /*

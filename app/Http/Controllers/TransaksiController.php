@@ -47,6 +47,33 @@ class TransaksiController extends Controller
     }
 
     /* =============================
+     * generate kode
+     * ============================= */
+    public function getGenerateCode(Request $request)
+    {
+        $tipe = $request->type; // 'masuk' atau 'keluar'
+
+        // Tentukan prefix berdasarkan tipe
+        $prefix = ($tipe == 'masuk') ? 'BM' : 'BK';
+
+        // Cari transaksi terakhir dengan tipe yang sama
+        $lastTransaksi = Transaksi::where('tipe_transaksi', $tipe)
+            ->latest('id')
+            ->first();
+
+        $lastNumber = 0;
+        if ($lastTransaksi && $lastTransaksi->kode_transaksi) {
+            // Mengambil 3 digit terakhir dari kode (contoh: BK-202512-001)
+            $lastNumber = intval(substr($lastTransaksi->kode_transaksi, -3));
+        }
+
+        $newCode = $prefix . '-' . date('Ym') . '-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        return response()->json([
+            'code' => $newCode
+        ]);
+    }
+    /* =============================
      * STORE
      * ============================= */
     public function store(Request $request)

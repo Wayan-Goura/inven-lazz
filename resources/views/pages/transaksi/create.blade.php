@@ -127,7 +127,7 @@
                         </div>
 
                         {{-- KODE TRANSAKSI --}}
-                        <div class="col-md-6">
+                        {{-- <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-gray-700">
                                     Kode Transaksi <span class="text-danger">*</span>
@@ -143,31 +143,33 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                        </div>
+                        </div> --}}
 
-                        {{-- TIPE --}}
+                        {{-- TIPE TRANSAKSI --}}
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label class="small font-weight-bold text-gray-700">
-                                    Tipe Transaksi <span class="text-danger">*</span>
-                                </label>
-                                <select 
-                                    name="tipe_transaksi" 
-                                    class="form-control @error('tipe_transaksi') is-invalid @enderror"
-                                    required
-                                >
+                                <label class="small font-weight-bold text-gray-700">Tipe Transaksi <span class="text-danger">*</span></label>
+                                {{-- FIXED: Tambahkan id="select-tipe" agar dibaca JS --}}
+                                <select name="tipe_transaksi" id="select-tipe" class="form-control @error('tipe_transaksi') is-invalid @enderror" required>
                                     <option value="">-- Pilih Tipe --</option>
-                                    <option value="masuk">Masuk</option>
-                                    <option value="keluar">Keluar</option>
+                                    <option value="masuk" {{ old('tipe_transaksi') == 'masuk' ? 'selected' : '' }}>Masuk</option>
+                                    <option value="keluar" {{ old('tipe_transaksi') == 'keluar' ? 'selected' : '' }}>Keluar</option>
                                 </select>
-                                @error('tipe_transaksi')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
                             </div>
                         </div>
 
-                        {{-- LOKASI --}}
+                        {{-- KODE TRANSAKSI --}}
                         <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">Kode Transaksi</label>
+                                {{-- FIXED: ID disesuaikan menjadi kode-transaksi agar sinkron dengan JS --}}
+                                <input type="text" id="kode-transaksi" name="kode_transaksi" class="form-control bg-light" value="{{ old('kode_transaksi') }}" readonly required>
+                            </div>
+                        </div>
+                                                {{-- <input type="text" id="kode-transaksi" name="kode_transaksi" class="form-control" readonly> --}}
+
+                        {{-- LOKASI --}}
+                        <div class="col-md-12">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-gray-700">
                                     Lokasi <span class="text-danger">*</span>
@@ -204,24 +206,67 @@
 {{-- SCRIPT --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const select = document.getElementById('data_barang_id');
-    const kode = document.getElementById('kode_barang');
-    const stok = document.getElementById('stok_barang');
+    // --- Bagian 1: Generate Kode Transaksi Otomatis ---
+    const selectTipe = document.getElementById('select-tipe');
+    const inputKodeTrx = document.getElementById('kode-transaksi');
 
-    function update() {
-        const opt = select.options[select.selectedIndex];
-        if (!opt || !opt.value) {
-            kode.value = '';
-            stok.value = '';
-            return;
+    if (selectTipe) {
+        selectTipe.addEventListener('change', function() {
+            let tipe = this.value;
+
+            if (tipe) {
+                inputKodeTrx.value = 'Memuat kode...';
+
+                // AJAX Fetch ke Controller
+                fetch(`{{ route('transaksi.generate-code') }}?type=${tipe}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Gagal memuat data');
+                        return response.json();
+                    })
+                    .then(data => {
+                        inputKodeTrx.value = data.code;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        inputKodeTrx.value = 'Gagal memuat kode';
+                        alert('Terjadi kesalahan saat mengambil kode transaksi.');
+                    });
+            } else {
+                inputKodeTrx.value = '';
+            }
+        });
+
+        // Jalankan jika ada nilai lama (misal saat validasi error)
+        if (selectTipe.value && !inputKodeTrx.value) {
+            selectTipe.dispatchEvent(new Event('change'));
         }
-        kode.value = opt.dataset.kode;
-        stok.value = opt.dataset.stok;
     }
 
-    select.addEventListener('change', update);
-    update();
+    // --- Bagian 2: Update Detail Barang saat Pilih Barang ---
+    const selectBarang = document.getElementById('data_barang_id');
+    const kodeBarang = document.getElementById('kode_barang');
+    const stokBarang = document.getElementById('stok_barang');
+
+    if (selectBarang) {
+        function updateDetailBarang() {
+            const opt = selectBarang.options[selectBarang.selectedIndex];
+            
+            if (!opt || !opt.value) {
+                kodeBarang.value = '';
+                stokBarang.value = '';
+                return;
+            }
+            
+            // Ambil dari atribut data-kode dan data-stok
+            kodeBarang.value = opt.getAttribute('data-kode') || '';
+            stokBarang.value = opt.getAttribute('data-stok') || '0';
+        }
+
+        selectBarang.addEventListener('change', updateDetailBarang);
+        
+        // Jalankan saat pertama kali load (untuk menangani 'old' value)
+        if(selectBarang.value) updateDetailBarang();
+    }
 });
 </script>
-
 @endsection

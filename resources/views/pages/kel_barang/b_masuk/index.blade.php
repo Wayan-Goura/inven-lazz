@@ -68,7 +68,7 @@
             
             {{-- 4. Jumlah Keluar --}}
             <td class="text-center">
-                <span class="badge badge-danger">- {{ $detail->jumlah }}</span>
+                <span class="badge badge-success">+ {{ $detail->jumlah }}</span>
             </td>
             <td>{{ $detail->barang->jml_stok ?? '0' }}</td>
             
