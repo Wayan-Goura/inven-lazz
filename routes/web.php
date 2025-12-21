@@ -79,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
 
             // transaction views (like Masuk, Return)
             Route::get('/masuk', fn() => view('pages.kel_barang.b_masuk.index'))->name('masuk.index');
+            Route::delete('/{id}', [TransaksiController::class, 'destroy'])->name('destroy');
 
             Route::prefix('return')->name('return.')->group(function () {
                 Route::get('/', fn() => view('pages.kel_barang.b_return.index'))->name('index');
