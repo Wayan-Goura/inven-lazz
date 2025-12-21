@@ -15,7 +15,7 @@
     <style>
         html, body {
             height: 100%;
-            overflow: hidden; /* STOP BODY SCROLL */
+            overflow: hidden;
         }
 
         #wrapper {
@@ -24,7 +24,7 @@
 
         #content-wrapper {
             height: 100vh;
-            overflow: hidden; /* sidebar tidak ikut scroll */
+            overflow: hidden;
         }
 
         #content {
@@ -34,7 +34,6 @@
             overflow: hidden;
         }
 
-        /* HANYA BAGIAN INI YANG BOLEH SCROLL */
         .page-content-scroll {
             flex: 1;
             overflow-y: auto;
@@ -57,19 +56,38 @@
         <!-- MAIN CONTENT -->
         <div id="content">
 
-            {{-- TOPBAR --}}
+            <!-- TOPBAR -->
             <nav class="navbar navbar-expand navbar-light bg-white topbar shadow">
-                <button id="sidebarToggleTop"
-                        class="btn btn-link d-md-none rounded-circle mr-3">
-                    <i class="fa fa-bars"></i>
+
+                <!-- TOGGLE DESKTOP -->
+                <button id="sidebarToggleCustom"
+                        class="btn btn-link rounded-circle mr-3 d-none d-md-inline">
+                    <i class="fas fa-bars"></i>
                 </button>
 
+                <!-- TOGGLE MOBILE (HAMBURGER) -->
+                <button id="sidebarToggleTop"
+                        class="btn btn-link rounded-circle mr-3 d-md-none">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- TITLE -->
                 <h5 class="mb-0 font-weight-bold text-gray-700">
                     Inventory Helmet
                 </h5>
+
+                <!-- TOPBAR RIGHT -->
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item d-flex align-items-center">
+                        <span class="mr-3 text-gray-600 small font-weight-bold">
+                            Welcome, {{ auth()->user()->name }}
+                        </span>
+                    </li>
+                </ul>
+
             </nav>
 
-            <!-- PAGE CONTENT (SCROLL AREA) -->
+            <!-- PAGE CONTENT -->
             <div class="page-content-scroll">
                 @yield('content')
             </div>
@@ -93,6 +111,30 @@
 <script src="{{ asset('sbadmin2/vendor/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('sbadmin2/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('sbadmin2/js/sb-admin-2.min.js') }}"></script>
+
+<!-- CUSTOM SIDEBAR TOGGLE -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const body = document.body;
+        const sidebar = document.querySelector('.sidebar');
+        const desktopToggle = document.getElementById('sidebarToggleCustom');
+
+        // LOAD STATUS (DESKTOP)
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+            body.classList.add('sidebar-toggled');
+            sidebar.classList.add('toggled');
+        }
+
+        // DESKTOP TOGGLE (ICON ONLY)
+        desktopToggle.addEventListener('click', function () {
+            body.classList.toggle('sidebar-toggled');
+            sidebar.classList.toggle('toggled');
+
+            const isCollapsed = sidebar.classList.contains('toggled');
+            localStorage.setItem('sidebar-collapsed', isCollapsed);
+        });
+    });
+</script>
 
 </body>
 </html>
