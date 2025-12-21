@@ -2,11 +2,12 @@
 @section('content')
 
 <div class="container-fluid">
-    {{-- Tampilkan error jika ada masalah pada transaction --}}
+
+    {{-- ALERT ERROR --}}
     @if(session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
-    {{-- Tampilkan error validasi jika ada --}}
+
     @if ($errors->any())
         <div class="alert alert-warning">
             Mohon periksa kembali input Anda.
@@ -23,12 +24,14 @@
 
             <form action="{{ route('transaksi.store') }}" method="POST">
                 @csrf
+
                 <div class="card-body" style="max-height: calc(100vh - 260px); overflow-y: auto;">
                     <div class="row">
-                        
+
+                        {{-- PILIH BARANG --}}
                         <div class="col-md-12">
                             <div class="form-group mb-3">
-                                <label class="small font-weight-bold text-gray-700" for="data_barang_id">
+                                <label class="small font-weight-bold text-gray-700">
                                     Pilih Barang <span class="text-danger">*</span>
                                 </label>
                                 <select 
@@ -41,9 +44,11 @@
                                     @foreach ($barangs as $barang)
                                         <option 
                                             value="{{ $barang->id }}"
+                                            data-kode="{{ $barang->k_barang }}"
+                                            data-stok="{{ $barang->jml_stok }}"
                                             {{ old('data_barang_id') == $barang->id ? 'selected' : '' }}
                                         >
-                                            {{ $barang->k_barang }} - {{ $barang->nama_barang }} (Stok: {{ $barang->jml_stok }})
+                                            {{ $barang->nama_barang }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -53,6 +58,36 @@
                             </div>
                         </div>
 
+                        {{-- KODE & STOK BARANG --}}
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Kode Barang
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="kode_barang"
+                                    class="form-control"
+                                    readonly
+                                >
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Stok Tersedia
+                                </label>
+                                <input 
+                                    type="number" 
+                                    id="stok_barang"
+                                    class="form-control"
+                                    readonly
+                                >
+                            </div>
+                        </div>
+
+                        {{-- JUMLAH --}}
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-gray-700">
@@ -64,7 +99,6 @@
                                     min="1"
                                     class="form-control @error('jumlah') is-invalid @enderror"
                                     value="{{ old('jumlah') }}"
-                                    placeholder="Jumlah barang"
                                     required
                                 >
                                 @error('jumlah')
@@ -72,7 +106,8 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
+                        {{-- TANGGAL --}}
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-gray-700">
@@ -90,7 +125,8 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
+                        {{-- KODE TRANSAKSI --}}
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-gray-700">
@@ -101,7 +137,6 @@
                                     name="kode_transaksi" 
                                     class="form-control @error('kode_transaksi') is-invalid @enderror"
                                     value="{{ old('kode_transaksi') }}"
-                                    placeholder="TRX-001"
                                     required
                                 >
                                 @error('kode_transaksi')
@@ -109,7 +144,8 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
+                        {{-- TIPE --}}
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-gray-700">
@@ -120,15 +156,17 @@
                                     class="form-control @error('tipe_transaksi') is-invalid @enderror"
                                     required
                                 >
-                                    <option value="">-- Pilih Tipe Transaksi --</option>
-                                    <option value="masuk" {{ old('tipe_transaksi') == 'masuk' ? 'selected' : '' }}>Masuk</option>
-                                    <option value="keluar" {{ old('tipe_transaksi') == 'keluar' ? 'selected' : '' }}>Keluar</option>
+                                    <option value="">-- Pilih Tipe --</option>
+                                    <option value="masuk">Masuk</option>
+                                    <option value="keluar">Keluar</option>
                                 </select>
                                 @error('tipe_transaksi')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
+
+                        {{-- LOKASI --}}
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-gray-700">
@@ -140,17 +178,17 @@
                                     required
                                 >
                                     <option value="">-- Pilih Lokasi --</option>
-                                    <option value="Jl. Melati No.10, Batubulan" {{ old('lokasi') == 'Jl. Melati No.10, Batubulan' ? 'selected' : '' }}>Jl. Melati No.10, Batubulan</option>
-                                    <option value="Jl. Kenanga No.5, Klungkung" {{ old('lokasi') == 'Jl. Kenanga No.5, Klungkung' ? 'selected' : '' }}>Jl. Kenanga No.5, Klungkung</option>
-                                    <option value="Jl. Anggrek No.7, Ubud" {{ old('lokasi') == 'Jl. Anggrek No.7, Ubud' ? 'selected' : '' }}>Jl. Anggrek No.7, Ubud</option>
+                                    <option value="Jl. Melati No.10, Batubulan">Jl. Melati No.10, Batubulan</option>
+                                    <option value="Jl. Kenanga No.5, Klungkung">Jl. Kenanga No.5, Klungkung</option>
+                                    <option value="Jl. Anggrek No.7, Ubud">Jl. Anggrek No.7, Ubud</option>
                                 </select>
                                 @error('lokasi')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
-                        
-                        </div>
+
+                    </div>
                 </div>
 
                 <div class="card-footer bg-white d-flex justify-content-end">
@@ -162,4 +200,28 @@
         </div>
     </div>
 </div>
+
+{{-- SCRIPT --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const select = document.getElementById('data_barang_id');
+    const kode = document.getElementById('kode_barang');
+    const stok = document.getElementById('stok_barang');
+
+    function update() {
+        const opt = select.options[select.selectedIndex];
+        if (!opt || !opt.value) {
+            kode.value = '';
+            stok.value = '';
+            return;
+        }
+        kode.value = opt.dataset.kode;
+        stok.value = opt.dataset.stok;
+    }
+
+    select.addEventListener('change', update);
+    update();
+});
+</script>
+
 @endsection
