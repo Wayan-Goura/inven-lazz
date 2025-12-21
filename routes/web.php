@@ -91,14 +91,11 @@ Route::middleware('auth')->group(function () {
             Route::put('/update/{id}', [TransaksiController::class, 'update'])->name('update');
 
             Route::get('/keluar', [TransaksiController::class, 'b_keluar'])->name('keluar.index');
-<<<<<<< HEAD
 
+            Route::get('/masuk', fn () => view('pages.kel_barang.b_masuk.index'))->name('masuk.index');
             // transaction views (like Masuk, Return)
             Route::get('/masuk', fn() => view('pages.kel_barang.b_masuk.index'))->name('masuk.index');
             Route::delete('/{id}', [TransaksiController::class, 'destroy'])->name('destroy');
-=======
-            Route::get('/masuk', fn () => view('pages.kel_barang.b_masuk.index'))->name('masuk.index');
->>>>>>> 522bb269d249e907a99c3053436056382fa3dace
 
             Route::prefix('return')->name('return.')->group(function () {
                 Route::get('/', fn () => view('pages.kel_barang.b_return.index'))->name('index');
