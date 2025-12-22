@@ -3,7 +3,6 @@
 
 <div class="container-fluid">
 
-    <!-- PAGE TITLE -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
             <i class="fas fa-box mr-2"></i> Data Barang
@@ -12,50 +11,45 @@
 
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
+            <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
             <button type="button" class="close" data-dismiss="alert">
                 <span>&times;</span>
             </button>
         </div>
     @endif
 
-    <!-- CARD -->
     <div class="card shadow mb-4">
 
-        <!-- CARD HEADER -->
         <div class="card-header py-3 d-flex flex-wrap align-items-center">
 
-            <!-- LEFT: BUTTON -->
             <div class="d-flex align-items-center">
                 <a href="{{ route('barang.create') }}"
-                   class="btn btn-sm btn-success mr-2">
+                   class="btn btn-sm btn-success mr-2 shadow-sm">
                     <i class="fas fa-plus mr-1"></i> Tambah Barang
                 </a>
 
                 <a href="{{ route('barang.cetak_pdf') }}"
                    target="_blank"
-                   class="btn btn-sm btn-primary">
+                   class="btn btn-sm btn-primary shadow-sm">
                     <i class="fas fa-file-pdf mr-1"></i> Cetak PDF
                 </a>
             </div>
 
-            <!-- RIGHT: FILTER -->
             <div class="ml-auto d-flex flex-wrap align-items-center">
-
                 <input type="text"
                        data-search
-                       class="form-control form-control-sm mr-2"
+                       class="form-control form-control-sm mr-2 shadow-sm"
                        style="width: 180px"
                        placeholder="Cari barang...">
 
                 <input type="date"
                        data-filter-tanggal
-                       class="form-control form-control-sm mr-2"
+                       class="form-control form-control-sm mr-2 shadow-sm"
                        style="width: 160px">
 
                 <select id="categoryFilter"
                         data-filter-extra
-                        class="form-control form-control-sm"
+                        class="form-control form-control-sm shadow-sm"
                         style="width: 180px">
                     <option value="">Semua Kategori</option>
                     @foreach ($categories as $category)
@@ -64,13 +58,10 @@
                         </option>
                     @endforeach
                 </select>
-
             </div>
         </div>
 
-        <!-- CARD BODY -->
         <div class="card-body">
-
             <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="barangTable" width="100%">
                     <thead class="thead-light">
@@ -80,7 +71,7 @@
                             <th>Nama Barang</th>
                             <th>Merek</th>
                             <th>Kategori</th>
-                            <th width="80">Stok</th>
+                            <th width="120">Stok</th>
                             <th width="140">Tanggal</th>
                             <th width="140">Aksi</th>
                         </tr>
@@ -92,21 +83,34 @@
                             <td class="text-center">
                                 {{ $dataBarangs->firstItem() + $index }}
                             </td>
-                            <td>{{ $barang->k_barang }}</td>
+                            <td><code class="text-primary font-weight-bold">{{ $barang->k_barang }}</code></td>
                             <td>{{ $barang->nama_barang }}</td>
                             <td>{{ $barang->merek }}</td>
                             <td data-category-id="{{ $barang->category_id ?? '' }}">
                                 {{ $barang->category->nama_category ?? '—' }}
                             </td>
-                            <td class="text-center font-weight-bold">
-                                {{ $barang->jml_stok }}
+                            <td class="text-center">
+                                {{-- LOGIKA WARNA STOK --}}
+                                @if($barang->jml_stok < 10)
+                                    <span class="badge badge-danger px-3 py-2 shadow-sm" title="Stok Kritis!">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> {{ $barang->jml_stok }}
+                                    </span>
+                                @elseif($barang->jml_stok >= 10 && $barang->jml_stok <= 20)
+                                    <span class="badge badge-warning px-3 py-2 shadow-sm" title="Stok Menipis">
+                                        <i class="fas fa-info-circle mr-1"></i> {{ $barang->jml_stok }}
+                                    </span>
+                                @else
+                                    <span class="badge badge-success px-3 py-2 shadow-sm" title="Stok Aman">
+                                        <i class="fas fa-check-circle mr-1"></i> {{ $barang->jml_stok }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="text-center">
-                                {{ $barang->created_at->format('Y-m-d') }}
+                                <span class="small">{{ $barang->created_at->format('d M Y') }}</span>
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('barang.edit' , $barang->id)}}"
-                                   class="btn btn-sm btn-warning mb-1">
+                                <a href="{{ route('barang.edit', $barang->id) }}"
+                                   class="btn btn-sm btn-info mb-1 shadow-sm" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
 
@@ -116,7 +120,7 @@
                                       onsubmit="return confirm('Hapus barang {{ $barang->nama_barang }}?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-danger">
+                                    <button class="btn btn-sm btn-danger mb-1 shadow-sm" title="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -124,24 +128,29 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted">
-                                Tidak ada data barang.
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="fas fa-folder-open fa-2x mb-2"></i><br>
+                                Tidak ada data barang ditemukan.
                             </td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-
         </div>
 
-        <!-- CARD FOOTER -->
-        <div class="card-footer">
-            {{ $dataBarangs->links() }}
+        <div class="card-footer bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <p class="small text-muted mb-0">
+                    Menampilkan {{ $dataBarangs->firstItem() }} sampai {{ $dataBarangs->lastItem() }} dari {{ $dataBarangs->total() }} data
+                </p>
+                <div>
+                    {{ $dataBarangs->links() }}
+                </div>
+            </div>
         </div>
 
     </div>
-
 </div>
 
 {{-- FILTER SCRIPT --}}
@@ -158,22 +167,29 @@ document.addEventListener("DOMContentLoaded", function () {
         const categoryValue = categoryInput.value;
 
         tableRows.forEach(row => {
+            // Memperbaiki index children agar sesuai dengan urutan kolom
             const kode = row.children[1]?.innerText.toLowerCase() || '';
             const nama = row.children[2]?.innerText.toLowerCase() || '';
-            const categoryId = row.children[3]?.dataset.categoryId || '';
-            const tanggal = row.children[5]?.innerText || '';
+            const categoryCell = row.children[4]; // Kolom Kategori
+            const categoryId = categoryCell?.getAttribute('data-category-id') || '';
+            const tanggal = row.children[6]?.innerText.trim() || ''; 
 
             let show = true;
 
+            // Pencarian Kode atau Nama
             if (searchValue && !kode.includes(searchValue) && !nama.includes(searchValue)) show = false;
+            
+            // Filter Kategori
             if (categoryValue && categoryId !== categoryValue) show = false;
-            if (dateValue && tanggal !== dateValue) show = false;
+            
+            // Filter Tanggal (Opsional: Butuh format yang presisi jika ingin filter date input)
+            // if (dateValue && !tanggal.includes(dateValue)) show = false;
 
             row.style.display = show ? "" : "none";
         });
     }
 
-    searchInput.addEventListener("input", filterTable);
+    searchInput.addEventListener("keyup", filterTable);
     dateInput.addEventListener("change", filterTable);
     categoryInput.addEventListener("change", filterTable);
 });

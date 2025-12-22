@@ -6,6 +6,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DataBarangController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\DashboardController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +39,7 @@ Route::middleware('auth')->group(function () {
     */
     Route::middleware('role:super_admin')->group(function () {
 
-        Route::get('/dashboard', fn () => view('dashboard'))
+        Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
 
         Route::prefix('users')->name('user.')->group(function () {

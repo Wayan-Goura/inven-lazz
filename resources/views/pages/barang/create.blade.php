@@ -1,60 +1,120 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="px-6 py-6 max-w-xl mx-auto">
-    <h1 class="text-2xl font-bold mb-6">Tambah Barang</h1>
+<div class="container-fluid">
 
-    <form action="{{ route('barang.store') }}" method="POST" class="bg-white p-6 rounded shadow space-y-4">
-        @csrf
+    {{-- ALERT ERROR --}}
+    @if ($errors->any())
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle mr-2"></i> Mohon periksa kembali input Anda.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
 
-        <div>
-            <label class="block mb-1 font-medium">Nama Barang</label>
-            <input type="text" name="nama_barang" placeholder="Bolpoin Hitam" class="w-full border p-2 rounded" required>
-            @error('nama_barang')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
-        </div>
-        <div>
-            <label class="block mb-1 font-medium">Merek</label>
-            <input type="text" name="merek" placeholder="Merek" class="w-full border p-2 rounded" required>
-            @error('merek')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
-        </div>
+    <div class="mx-auto" style="max-width: 900px;">
+        <div class="card shadow">
+            
+            {{-- HEADER: Mengikuti style Transaksi --}}
+            <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-plus-circle mr-2"></i> Tambah Data Barang
+                </h6>
+                <a href="{{ route('barang.index') }}" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Kembali
+                </a>
+            </div>
 
-        <div>
-            <label class="block mb-1 font-medium">Kategori</label>
-            <select name="category_id" class="w-full border p-2 rounded" required>
-                <option value="">Pilih Kategori</option>
-                @foreach(\App\Models\Category::all() as $category)
-                    <option value="{{ $category->id }}">{{ $category->nama_category }}</option>
-                @endforeach
-            </select>
-            @error('category_id')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
-        </div>
+            <form action="{{ route('barang.store') }}" method="POST">
+                @csrf
 
-        <div>
-            <label class="block mb-1 font-medium">Kode Barang</label>
-            <input type="text" name="k_barang" placeholder="BRG001" class="w-full border p-2 rounded" required>
-            @error('k_barang')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
-        </div>
+                {{-- BODY: Mengikuti style Transaksi (Tanpa inner-card putih) --}}
+                <div class="card-body" style="max-height: calc(100vh - 260px); overflow-y: auto;">
+                    <div class="row">
 
-        <div>
-            <label class="block mb-1 font-medium">Jumlah Stok</label>
-            <input type="number" name="jml_stok" placeholder="120" class="w-full border p-2 rounded" min="0" required>
-            @error('jml_stok')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
-        </div>
+                        {{-- NAMA BARANG --}}
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Nama Barang <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="nama_barang" value="{{ old('nama_barang') }}" 
+                                    class="form-control @error('nama_barang') is-invalid @enderror" 
+                                    placeholder="Contoh: Bolpoin Hitam" required>
+                                @error('nama_barang') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
 
-        <div class="flex justify-end gap-2">
-            <a href="{{ route('barang.index') }}" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">Batal</a>
-            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Simpan</button>
+                        {{-- MEREK --}}
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Merek <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="merek" value="{{ old('merek') }}" 
+                                    class="form-control @error('merek') is-invalid @enderror" 
+                                    placeholder="Contoh: Joyko" required>
+                                @error('merek') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        {{-- KATEGORI --}}
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Kategori <span class="text-danger">*</span>
+                                </label>
+                                <select name="category_id" class="form-control @error('category_id') is-invalid @enderror" required>
+                                    <option value="" selected disabled>-- Pilih Kategori --</option>
+                                    @foreach(\App\Models\Category::all() as $category)
+                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->nama_category }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        {{-- KODE BARANG --}}
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Kode Barang <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="k_barang" value="{{ old('k_barang') }}" 
+                                    class="form-control @error('k_barang') is-invalid @enderror" 
+                                    placeholder="BRG001" required>
+                                @error('k_barang') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                        {{-- JUMLAH STOK --}}
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-gray-700">
+                                    Jumlah Stok <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" name="jml_stok" value="{{ old('jml_stok') }}" 
+                                    class="form-control @error('jml_stok') is-invalid @enderror" 
+                                    placeholder="0" min="0" required>
+                                @error('jml_stok') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                {{-- FOOTER: Mengikuti style Transaksi --}}
+                <div class="card-footer bg-white d-flex justify-content-end">
+                    <button type="reset" class="btn btn-light mr-2">Reset</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i> Simpan Barang
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 @endsection
