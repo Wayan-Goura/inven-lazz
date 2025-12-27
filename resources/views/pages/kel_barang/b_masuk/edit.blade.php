@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
 {{-- resources/views/pages/kel_barang/b_masuk/edit.blade.php --}}
 @if ($errors->any())
     <div class="alert alert-danger">

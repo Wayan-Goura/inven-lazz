@@ -77,9 +77,12 @@
 
             {{-- 6. Aksi --}}
             <td class="text-center">
-                <a href="{{ route('transaksi.edit', $item->id) }}" class="btn btn-sm btn-warning">
+                <a href="{{ route('transaksi.edit', $item->id) }}"
+                class="btn btn-sm btn-warning">
                     <i class="fas fa-edit"></i>
                 </a>
+
+
                 <form action="{{ route('transaksi.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data transaksi ini?')">
                     @csrf
                     @method('DELETE')
