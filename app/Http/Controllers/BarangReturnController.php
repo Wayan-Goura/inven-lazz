@@ -2,64 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BarangRetrun;
+use App\Models\User;
+use App\Models\BarangReturn;
+use App\Models\Category;
+use App\Models\DataBarang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BarangReturnController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar semua catatan return.
      */
     public function index()
     {
-        
+        // Variabel disesuaikan dengan view: $barangReturn
+        $barangReturn = BarangReturn::with(['barang', 'category', 'user'])->latest()->get();
+        return view('pages.kel_barang.b_return.index', compact('barangReturn'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form untuk mencatat return baru.
      */
     public function create()
     {
-        //
+        $barangs = DataBarang::all();
+        $categories = Category::all();
+        return view('pages.kel_barang.b_return.create', compact('barangs', 'categories'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan data return ke database.
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'barang_id' => 'required|exists:data_barangs,id',
+            'category_id' => 'required|exists:categories,id',
+            'tanggal_return' => 'required|date', // Perbaikan typo: return (bukan retrun)
+            'jumlah_return' => 'required|integer|min:1', // Perbaikan typo: return
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        BarangReturn::create([
+            'barang_id' => $request->barang_id,
+            'category_id' => $request->category_id,
+            'tanggal_return' => $request->tanggal_return,
+            'jumlah_return' => $request->jumlah_return,
+            'deskripsi' => $request->deskripsi,
+            'user_id' => Auth::id(),
+        ]);
+        return redirect()->route('kel_barang.b_return.index')->with('success', 'Catatan return berhasil disimpan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(BarangRetrun $barangRetrun)
+    public function edit($id)
     {
-        //
+        $return = BarangReturn::findOrFail($id);
+        $barangs = DataBarang::all();
+        $categories = Category::all();
+
+        return view('pages.kel_barang.b_return.edit', compact('return', 'barangs', 'categories'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(BarangRetrun $barangRetrun)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'barang_id' => 'required|exists:data_barangs,id',
+            'category_id' => 'required|exists:categories,id',
+            'tanggal_return' => 'required|date',
+            'jumlah_return' => 'required|integer|min:1',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $return = BarangReturn::findOrFail($id);
+
+        $return->update([
+            'barang_id' => $request->barang_id,
+            'category_id' => $request->category_id,
+            'tanggal_return' => $request->tanggal_return,
+            'jumlah_return' => $request->jumlah_return,
+            'deskripsi' => $request->deskripsi,
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()->route('kel_barang.b_return.index')->with('success', 'Catatan return berhasil diperbarui.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, BarangRetrun $barangRetrun)
+    public function destroy($id)
     {
-        //
-    }
+        $return = BarangReturn::findOrFail($id);
+        $return->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(BarangRetrun $barangRetrun)
-    {
-        //
+        return redirect()->route('kel_barang.b_return.index')->with('success', 'Catatan return berhasil dihapus.');
     }
 }

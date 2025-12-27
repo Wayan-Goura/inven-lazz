@@ -55,7 +55,7 @@ class DataBarang extends Model
      */
     public function barangRetruns(): HasMany
     {
-        return $this->hasMany(BarangRetrun::class, 'barang_id');
+        return $this->hasMany(BarangReturn::class, 'barang_id');
     }
 
     public function transaksis(): HasMany

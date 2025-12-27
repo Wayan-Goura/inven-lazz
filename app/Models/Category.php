@@ -21,4 +21,10 @@ class Category extends Model
     {
         return $this->hasMany(Transaksi::class);
     }
+
+    public function Barangreturns()
+    {
+        return $this->hasMany(BarangReturn::class);
+    }
+
 }
