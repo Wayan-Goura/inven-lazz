@@ -143,7 +143,7 @@ public function edit($id)
     
     return view("pages.kel_barang.{$folder}.edit", compact('transaksi', 'barangs', 'categories'));
 }
-
+// UPDATE
 public function update(Request $request, $id)
 {
     $request->validate([
