@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BarangRetrun;
 use Illuminate\Http\Request;
 
-class BarangRetrunController extends Controller
+class BarangReturnController extends Controller
 {
     /**
      * Display a listing of the resource.

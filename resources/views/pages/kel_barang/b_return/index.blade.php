@@ -12,6 +12,11 @@
 
             <!-- KIRI -->
             <div>
+                <a href="{{ route('kel_barang.b_return.create') }}"
+                   class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> Tambah Data
+                </a>
+
                 <a href="#" class="btn btn-sm btn-secondary">
                     <i class="fas fa-file-pdf"></i> Cetak PDF
                 </a>
@@ -21,20 +26,6 @@
             <div class="d-flex gap-2">
                 <input type="text" class="form-control form-control-sm"
                        placeholder="Cari barang..." data-search>
-
-                <select class="form-control form-control-sm" data-filter-tanggal>
-                    <option value="">Tanggal</option>
-                    <option value="today">Hari ini</option>
-                    <option value="week">Minggu ini</option>
-                    <option value="month">Bulan ini</option>
-                </select>
-
-                <select class="form-control form-control-sm" data-filter-extra>
-                    <option value="">Kategori</option>
-                    <option value="helm">Helm</option>
-                    <option value="kaca">Kaca</option>
-                    <option value="tali">Tali</option>
-                </select>
             </div>
 
         </div>
@@ -54,78 +45,51 @@
                     <th>Tanggal</th>
                     <th>Alasan</th>
                     <th class="text-center">Jumlah</th>
+                    <th class="text-center">Action</th>
                 </tr>
                 </thead>
+
                 <tbody>
+                @forelse($barangs as $i => $barang)
                 <tr>
-                    <td>1</td>
-                    <td>BRG001</td>
-                    <td>Bolpoin Hitam</td>
-                    <td>Standard</td>
-                    <td>Helm</td>
-                    <td>2025-01-13</td>
-                    <td>Rusak</td>
-                    <td class="text-center">20</td>
+                    <td>{{ $i + 1 }}</td>
+                    <td>{{ $barang->kode }}</td>
+                    <td>{{ $barang->nama }}</td>
+                    <td>{{ $barang->merk }}</td>
+                    <td>{{ $barang->kategori }}</td>
+                    <td>{{ $barang->tanggal }}</td>
+                    <td>{{ $barang->alasan }}</td>
+                    <td class="text-center">{{ $barang->jumlah }}</td>
+
+                    <td class="text-center">
+                        <a href="{{ route('kel_barang.b_return.edit', $barang->id) }}"
+                           class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i>
+                        </a>
+
+                        <form action="{{ route('kel_barang.b_return.destroy', $barang->id) }}"
+                              method="POST" class="d-inline"
+                              onsubmit="return confirm('Hapus data ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
                 </tr>
+                @empty
+                <tr>
+                    <td colspan="9" class="text-center text-muted">
+                        Data belum tersedia
+                    </td>
+                </tr>
+                @endforelse
                 </tbody>
+
             </table>
         </div>
     </div>
 
 </div>
-
-{{-- JS TETAP --}}
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const searchInput = document.querySelector("[data-search]");
-    const filterTanggal = document.querySelector("[data-filter-tanggal]");
-    const filterExtra = document.querySelector("[data-filter-extra]");
-    const tableRows = document.querySelectorAll("tbody tr");
-
-    function filterTable() {
-        const searchValue = searchInput.value.toLowerCase();
-        const tanggalValue = filterTanggal.value;
-        const extraValue = filterExtra.value.toLowerCase();
-
-        const today = new Date();
-        const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
-        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-        tableRows.forEach(row => {
-            const rowText = row.innerText.toLowerCase();
-            const tanggalText = row.children[4]?.innerText ?? "";
-            const rowTanggal = new Date(tanggalText);
-
-            let show = true;
-
-            if (searchValue && !rowText.includes(searchValue)) show = false;
-            if (tanggalValue === "today" && rowTanggal.toDateString() !== today.toDateString()) show = false;
-            if (tanggalValue === "week" && rowTanggal < startOfWeek) show = false;
-            if (tanggalValue === "month" && rowTanggal < startOfMonth) show = false;
-            if (extraValue && !rowText.includes(extraValue)) show = false;
-
-            row.style.display = show ? "" : "none";
-        });
-    }
-
-    searchInput.addEventListener("input", () => {
-        filterTanggal.value = "";
-        filterExtra.value = "";
-        filterTable();
-    });
-
-    filterTanggal.addEventListener("change", () => {
-        searchInput.value = "";
-        filterExtra.value = "";
-        filterTable();
-    });
-
-    filterExtra.addEventListener("change", () => {
-        searchInput.value = "";
-        filterTanggal.value = "";
-        filterTable();
-    });
-});
-</script>
-
 @endsection
