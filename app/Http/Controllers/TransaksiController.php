@@ -132,6 +132,83 @@ class TransaksiController extends Controller
             return back()->withErrors($e->getMessage());
         }
     }
+public function edit($id)
+{
+    $transaksi = Transaksi::with('detailTransaksis.barang')->findOrFail($id);
+    $barangs = DataBarang::all();
+    $categories = Category::all();
+
+    // Sesuaikan dengan struktur folder: pages.kel_barang.b_masuk.edit
+    $folder = ($transaksi->tipe_transaksi === 'masuk') ? 'b_masuk' : 'b_keluar';
+    
+    return view("pages.kel_barang.{$folder}.edit", compact('transaksi', 'barangs', 'categories'));
+}
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'tanggal_transaksi' => 'required|date',
+        'data_barang_id' => 'required|exists:data_barangs,id',
+        'jumlah' => 'required|integer|min:1',
+        'lokasi' => 'required|string',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $transaksi = Transaksi::findOrFail($id);
+        $detail = $transaksi->detailTransaksis->first();
+
+        // 1. REVERT STOK LAMA
+        $barangLama = DataBarang::findOrFail($detail->data_barang_id);
+        if ($transaksi->tipe_transaksi === 'masuk') {
+            $barangLama->jml_stok -= $detail->jumlah;
+        } else {
+            $barangLama->increment('jml_stok', $detail->jumlah);
+        }
+        $barangLama->save();
+
+        // 2. APPLY STOK BARU
+        $barangBaru = DataBarang::findOrFail($request->data_barang_id);
+        if ($transaksi->tipe_transaksi === 'keluar' && $barangBaru->jml_stok < $request->jumlah) {
+            throw new \Exception('Stok tidak mencukupi!');
+        }
+
+        if ($transaksi->tipe_transaksi === 'masuk') {
+            $barangBaru->jml_stok += $request->jumlah;
+        } else {
+            $barangBaru->jml_stok -= $request->jumlah;
+        }
+        $barangBaru->save();
+
+        // 3. UPDATE DATA TRANSAKSI UTAMA
+        $transaksi->update([
+            'tanggal_transaksi' => $request->tanggal_transaksi,
+            'total_barang' => $request->jumlah,
+            'lokasi' => $request->lokasi,
+        ]);
+
+        // 4. UPDATE DETAIL TRANSAKSI (MENGGUNAKAN QUERY BUILDER UNTUK MENGHINDARI ERROR 'ID IS NULL')
+        // Ini akan mencari berdasarkan transaksi_id, bukan id primary key detail
+        DB::table('detail_transaksis')
+            ->where('transaksi_id', $transaksi->id)
+            ->update([
+                'data_barang_id' => $request->data_barang_id,
+                'jumlah' => $request->jumlah,
+                'updated_at' => now()
+            ]);
+
+        DB::commit();
+
+        // Redirect sesuai route list Anda (transaksi.index tidak ada, gunakan b_masuk/b_keluar)
+        $route = ($transaksi->tipe_transaksi === 'masuk') ? 'kel_barang.b_masuk.index' : 'kel_barang.b_keluar.index';
+        
+        return redirect()->route($route)->with('success', 'Data Berhasil Diperbarui');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->withErrors($e->getMessage())->withInput();
+    }
+}
 
     /* =============================
      * DELETE

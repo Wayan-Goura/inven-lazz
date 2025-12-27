@@ -1,76 +1,49 @@
-<h5 class="mb-3 text-gray-800 font-weight-bold">
-    Edit Barang Masuk (ID: {{ $id }})
-</h5>
+@extends('layouts.app')
 
-<form>
+@section('content')
+{{-- resources/views/pages/kel_barang/b_masuk/edit.blade.php --}}
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul> @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach </ul>
+    </div>
+@endif
+<form action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
+    @csrf
+    @method('PUT')
 
     <div class="row">
-
-        <!-- KODE BARANG -->
+        {{-- Pastikan nama input sesuai dengan $request->validate di controller --}}
         <div class="col-md-6 mb-3">
-            <label>Kode Barang *</label>
-            <input type="text"
-                   class="form-control"
-                   value="BRG001">
-        </div>
-
-        <!-- NAMA BARANG -->
-        <div class="col-md-6 mb-3">
-            <label>Nama Barang *</label>
-            <input type="text"
-                   class="form-control"
-                   value="Helm Bogo Retro">
-        </div>
-
-        <!-- MERK -->
-        <div class="col-md-6 mb-3">
-            <label>Merk *</label>
-            <input type="text"
-                   class="form-control"
-                   value="Bogo">
-        </div>
-
-        <!-- KATEGORI -->
-        <div class="col-md-6 mb-3">
-            <label>Kategori *</label>
-            <select class="form-control">
-                <option value="">-- Pilih Kategori --</option>
-                <option value="Helm" selected>Helm</option>
-                <option value="Aksesoris">Aksesoris</option>
-                <option value="Oli">Oli</option>
+            <label>Nama Barang</label>
+            <select name="data_barang_id" class="form-control">
+                @foreach($barangs as $b)
+                    <option value="{{ $b->id }}" {{ $transaksi->detailTransaksis->first()->data_barang_id == $b->id ? 'selected' : '' }}>
+                        {{ $b->nama_barang }} (Stok: {{ $b->jml_stok }})
+                    </option>
+                @endforeach
             </select>
         </div>
 
-        <!-- TANGGAL -->
         <div class="col-md-6 mb-3">
-            <label>Tanggal Masuk *</label>
-            <input type="date"
-                   class="form-control"
-                   value="2025-01-10">
+            <label>Tanggal Transaksi</label>
+            <input type="date" name="tanggal_transaksi" class="form-control" value="{{ $transaksi->tanggal_transaksi }}">
         </div>
 
-        <!-- JUMLAH -->
         <div class="col-md-6 mb-3">
-            <label>Jumlah *</label>
-            <input type="number"
-                   class="form-control"
-                   value="15">
+            <label>Jumlah</label>
+            <input type="number" name="jumlah" class="form-control" value="{{ $transaksi->detailTransaksis->first()->jumlah }}">
         </div>
 
+        <div class="col-md-6 mb-3">
+            <label>Lokasi</label>
+            <input type="text" name="lokasi" class="form-control" value="{{ $transaksi->lokasi }}">
+        </div>
     </div>
 
-    <!-- BUTTON -->
-    <div class="text-right mt-3">
-        <button type="button"
-                onclick="closeModal()"
-                class="btn btn-secondary btn-sm">
-            Batal
-        </button>
-
-        <button type="button"
-                class="btn btn-primary btn-sm">
-            Update
-        </button>
+    <div class="text-right">
+        <a href="{{ route('kel_barang.b_masuk.index') }}" class="btn btn-secondary">Batal</a>
+        <button type="submit" class="btn btn-primary">Update Data</button>
     </div>
-
 </form>
+
+@endsection
