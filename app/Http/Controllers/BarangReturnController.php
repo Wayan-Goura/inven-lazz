@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\BarangReturn;
 use App\Models\Category;
 use App\Models\DataBarang;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class BarangReturnController extends Controller
 {
     /**
+<<<<<<< HEAD
      * Menampilkan daftar semua catatan return.
      */
     public function index()

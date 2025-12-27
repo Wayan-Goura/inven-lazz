@@ -7,7 +7,7 @@ use App\Http\Controllers\DataBarangController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\BarangReturnController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,7 +18,7 @@ Route::get('/', fn () => redirect()->route('login'));
 
 /*
 |--------------------------------------------------------------------------
-| AUTHENTICATION
+| AUTH
 |--------------------------------------------------------------------------
 */
 Route::get('/login', [LoginController::class, 'show'])->name('login');
@@ -27,7 +27,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 /*
 |--------------------------------------------------------------------------
-| PROTECTED ROUTES
+| PROTECTED
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -48,7 +48,6 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
         });
 
-        // KELOLA ROLE / ADMIN
         Route::prefix('kel-role')->name('kel_role.')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('index');
             Route::get('/create', [UserController::class, 'create'])->name('create');
@@ -66,22 +65,31 @@ Route::middleware('auth')->group(function () {
     */
     Route::middleware('role:admin,super_admin')->group(function () {
 
-        /*
-        | TRANSAKSI BARANG (LIST)
-        */
+        // LIST TRANSAKSI
         Route::get('/barang-masuk', [TransaksiController::class, 'b_masuk'])
             ->name('kel_barang.b_masuk.index');
 
         Route::get('/barang-keluar', [TransaksiController::class, 'b_keluar'])
             ->name('kel_barang.b_keluar.index');
 
-        Route::get('/barang-return', fn () =>
-            view('pages.kel_barang.b_return.index')
-        )->name('kel_barang.b_return.index');
-
         /*
-        | TRANSAKSI CRUD
+        |--------------------------------------------------------------------------
+        | BARANG RETURN
+        |--------------------------------------------------------------------------
         */
+        Route::prefix('barang-return')
+            ->name('kel_barang.b_return.')
+            ->group(function () {
+
+                Route::get('/', [BarangReturnController::class, 'index'])->name('index');
+                Route::get('/create', [BarangReturnController::class, 'create'])->name('create');
+                Route::post('/', [BarangReturnController::class, 'store'])->name('store');
+                Route::get('/{id}/edit', [BarangReturnController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [BarangReturnController::class, 'update'])->name('update');
+                Route::delete('/{id}', [BarangReturnController::class, 'destroy'])->name('destroy');
+            });
+
+        // TRANSAKSI
         Route::prefix('transaksi')->name('transaksi.')->group(function () {
             Route::get('/create', [TransaksiController::class, 'create'])->name('create');
             Route::post('/', [TransaksiController::class, 'store'])->name('store');
@@ -91,17 +99,13 @@ Route::middleware('auth')->group(function () {
             Route::get('/generate-code', [TransaksiController::class, 'getGenerateCode'])->name('generate-code');
         });
 
-        /*
-        | DATA BARANG
-        */
+        // DATA BARANG
         Route::resource('barang', DataBarangController::class)->except(['show']);
 
         Route::get('barang/pdf-mpdf', [DataBarangController::class, 'cetak_pdf'])
             ->name('barang.cetak_pdf');
 
-        /*
-        | KATEGORI BARANG
-        */
+        // KATEGORI
         Route::prefix('kel_barang/catagory')->name('kel_barang.catagory.')->group(function () {
             Route::get('/', [CategoryController::class, 'index'])->name('index');
             Route::get('/create', [CategoryController::class, 'create'])->name('create');
@@ -111,16 +115,8 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
         });
 
-        /*
-        | PROFILE
-        */
         Route::get('/profile', fn () => view('pages.profile'))->name('profile');
     });
 });
 
-/*
-|--------------------------------------------------------------------------
-| FALLBACK
-|--------------------------------------------------------------------------
-*/
 Route::fallback(fn () => abort(404));
