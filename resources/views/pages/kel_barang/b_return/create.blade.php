@@ -14,44 +14,42 @@
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
-                        <label>Kode Barang</label>
-                        <input type="text" name="kode" class="form-control" required>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
                         <label>Nama Barang</label>
-                        <input type="text" name="nama" class="form-control" required>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label>Merk</label>
-                        <input type="text" name="merk" class="form-control">
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label>Kategori</label>
-                        <select name="kategori" class="form-control" required>
-                            <option value="">-- Pilih --</option>
-                            <option value="Helm">Helm</option>
-                            <option value="Kaca">Kaca</option>
-                            <option value="Tali">Tali</option>
+                        <select name="barang_id" class="form-control" required>
+                            <option value="">-- Pilih Barang --</option>
+                            @foreach($barangs as $barang)
+                                <option value="{{ $barang->id }}">{{ $barang->nama_barang }}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class="col-md-6 mb-3">
+                        <label>Kategori</label>
+                        <select name="category_id" class="form-control" required>
+                            <option value="">-- Pilih Kategori --</option>
+                        @foreach($categories as $category)
+                            {{-- Ganti $category->name jika nama kolom di DB Anda berbeda --}}
+                            <option value="{{ $category->id }}">
+                                {{ $category->name ?? $category->nama_category ?? 'Nama Tidak Ditemukan' }}
+                            </option>
+                        @endforeach
+                        </select>                         
+                    </div>
+
+                    <div class="col-md-6 mb-3">
                         <label>Tanggal Return</label>
-                        <input type="date" name="tanggal" class="form-control" required>
+                        <input type="date" name="tanggal_return" class="form-control" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label>Jumlah</label>
-                        <input type="number" name="jumlah" min="1"
+                        <input type="number" name="jumlah_return" min="1"
                                class="form-control" required>
                     </div>
 
                     <div class="col-12 mb-3">
-                        <label>Alasan</label>
-                        <textarea name="alasan" class="form-control" rows="3"></textarea>
+                        <label>Alasan (Deskripsi)</label>
+                        <textarea name="deskripsi" class="form-control" rows="3"></textarea>
                     </div>
 
                 </div>
@@ -61,7 +59,7 @@
                        class="btn btn-secondary">
                         Kembali
                     </a>
-                    <button class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary">
                         Simpan
                     </button>
                 </div>

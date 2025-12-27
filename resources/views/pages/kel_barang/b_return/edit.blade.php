@@ -8,7 +8,8 @@
     <div class="card shadow">
         <div class="card-body">
 
-            <form action="{{ route('kel_barang.b_return.update', $barang->id) }}"
+            {{-- Menggunakan $return->id sesuai dengan data yang dilempar dari controller --}}
+            <form action="{{ route('kel_barang.b_return.update', $return->id) }}"
                   method="POST">
                 @csrf
                 @method('PUT')
@@ -16,49 +17,51 @@
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
-                        <label>Kode Barang</label>
-                        <input type="text" name="kode" class="form-control"
-                               value="{{ $barang->kode }}" required>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
                         <label>Nama Barang</label>
-                        <input type="text" name="nama" class="form-control"
-                               value="{{ $barang->nama }}" required>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label>Merk</label>
-                        <input type="text" name="merk" class="form-control"
-                               value="{{ $barang->merk }}">
+                        <select name="barang_id" class="form-control" required>
+                            <option value="">-- Pilih Barang --</option>
+                            @foreach($barangs as $barang)
+                                <option value="{{ $barang->id }}" 
+                                    {{ $return->barang_id == $barang->id ? 'selected' : '' }}>
+                                    {{ $barang->nama_barang }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label>Kategori</label>
-                        <select name="kategori" class="form-control" required>
-                            <option value="Helm" {{ $barang->kategori=='Helm'?'selected':'' }}>Helm</option>
-                            <option value="Kaca" {{ $barang->kategori=='Kaca'?'selected':'' }}>Kaca</option>
-                            <option value="Tali" {{ $barang->kategori=='Tali'?'selected':'' }}>Tali</option>
+                        <select name="category_id" class="form-control" required>
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" 
+                                    {{ $return->category_id == $category->id ? 'selected' : '' }}>
+                                    {{ $category->nama_category }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label>Tanggal Return</label>
-                        <input type="date" name="tanggal" class="form-control"
-                               value="{{ $barang->tanggal }}" required>
+                        {{-- Kolom database: tanggal_return --}}
+                        <input type="date" name="tanggal_return" class="form-control"
+                               value="{{ $return->tanggal_return }}" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label>Jumlah</label>
-                        <input type="number" name="jumlah" min="1"
+                        {{-- Kolom database: jumlah_return --}}
+                        <input type="number" name="jumlah_return" min="1"
                                class="form-control"
-                               value="{{ $barang->jumlah }}" required>
+                               value="{{ $return->jumlah_return }}" required>
                     </div>
 
                     <div class="col-12 mb-3">
-                        <label>Alasan</label>
-                        <textarea name="alasan" class="form-control"
-                                  rows="3">{{ $barang->alasan }}</textarea>
+                        <label>Alasan (Deskripsi)</label>
+                        {{-- Kolom database: deskripsi --}}
+                        <textarea name="deskripsi" class="form-control"
+                                  rows="3">{{ $return->deskripsi }}</textarea>
                     </div>
 
                 </div>
@@ -68,8 +71,8 @@
                        class="btn btn-secondary">
                         Batal
                     </a>
-                    <button class="btn btn-warning">
-                        Update
+                    <button type="submit" class="btn btn-warning">
+                        Update Data
                     </button>
                 </div>
 

@@ -14,7 +14,7 @@ use App\Http\Controllers\BarangReturnController;
 | DEFAULT
 |--------------------------------------------------------------------------
 */
-Route::get('/', fn () => redirect()->route('login'));
+Route::get('/', fn() => redirect()->route('login'));
 
 /*
 |--------------------------------------------------------------------------
@@ -115,8 +115,8 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
         });
 
-        Route::get('/profile', fn () => view('pages.profile'))->name('profile');
+        Route::get('/profile', fn() => view('pages.profile'))->name('profile');
     });
 });
 
-Route::fallback(fn () => abort(404));
+Route::fallback(fn() => abort(404));

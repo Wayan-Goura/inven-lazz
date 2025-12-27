@@ -38,36 +38,32 @@
                 <thead class="thead-light">
                 <tr>
                     <th>No</th>
-                    <th>Kode</th>
                     <th>Nama</th>
-                    <th>Merk</th>
                     <th>Kategori</th>
-                    <th>Tanggal</th>
+                    <th>Tanggal Return</th>
+                    <th>Jumlah Return</th>
                     <th>Alasan</th>
-                    <th class="text-center">Jumlah</th>
                     <th class="text-center">Action</th>
                 </tr>
                 </thead>
 
                 <tbody>
-                @forelse($barangs as $i => $barang)
+                @forelse($barangReturn as $i => $return)
                 <tr>
                     <td>{{ $i + 1 }}</td>
-                    <td>{{ $barang->kode }}</td>
-                    <td>{{ $barang->nama }}</td>
-                    <td>{{ $barang->merk }}</td>
-                    <td>{{ $barang->kategori }}</td>
-                    <td>{{ $barang->tanggal }}</td>
-                    <td>{{ $barang->alasan }}</td>
-                    <td class="text-center">{{ $barang->jumlah }}</td>
+                    <td>{{ $return->barang->nama_barang }}</td>
+                    <td>{{ $return->category->nama_category }}</td>
+                    <td>{{ $return->tanggal_return }}</td>
+                    <td class="text-center">{{ $return->jumlah_return }}</td>
+                    <td>{{ $return->deskripsi }}</td>
 
                     <td class="text-center">
-                        <a href="{{ route('kel_barang.b_return.edit', $barang->id) }}"
+                        <a href="{{ route('kel_barang.b_return.edit', $return->id) }}"
                            class="btn btn-sm btn-warning">
                             <i class="fas fa-edit"></i>
                         </a>
 
-                        <form action="{{ route('kel_barang.b_return.destroy', $barang->id) }}"
+                        <form action="{{ route('kel_barang.b_return.destroy', $return->id) }}"
                               method="POST" class="d-inline"
                               onsubmit="return confirm('Hapus data ini?')">
                             @csrf

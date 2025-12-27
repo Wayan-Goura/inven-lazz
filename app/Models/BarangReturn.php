@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BarangReturn extends Model
 {
-    public $filable = [
+    public $fillable = [
         'barang_id',
         'category_id',
         'tanggal_return',
@@ -20,7 +20,7 @@ class BarangReturn extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function user()
