@@ -3,20 +3,21 @@
 
 <div class="container-fluid">
 
-    {{-- ALERT ERROR --}}
+    {{-- ALERT ERROR (Hanya untuk pesan manual/stok kurang dari Controller) --}}
     @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-
-    @if ($errors->any())
-        <div class="alert alert-warning">
-            Mohon periksa kembali input Anda.
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fas fa-exclamation-circle mr-1"></i> {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
     @endif
 
+    {{-- Pesan Peringatan Umum Dihapus (Diganti Pesan Spesifik di Bawah Input) --}}
+
     <div class="mx-auto" style="max-width: 900px;">
         <div class="card shadow">
-            <div class="card-header py-3 d-flex align-items-center">
+            <div class="card-header py-3 d-flex align-items-center bg-white">
                 <h6 class="m-0 font-weight-bold text-primary">
                     <i class="fas fa-box-open mr-2"></i> Transaksi Barang
                 </h6>
@@ -52,38 +53,25 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                {{-- PESAN ERROR SPESIFIK --}}
                                 @error('data_barang_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback font-weight-bold">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
 
-                        {{-- KODE & STOK BARANG --}}
+                        {{-- KODE & STOK BARANG (Hanya Baca) --}}
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label class="small font-weight-bold text-gray-700">
-                                    Kode Barang
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="kode_barang"
-                                    class="form-control"
-                                    readonly
-                                >
+                                <label class="small font-weight-bold text-gray-700">Kode Barang</label>
+                                <input type="text" id="kode_barang" class="form-control bg-light" readonly>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label class="small font-weight-bold text-gray-700">
-                                    Stok Tersedia
-                                </label>
-                                <input 
-                                    type="number" 
-                                    id="stok_barang"
-                                    class="form-control"
-                                    readonly
-                                >
+                                <label class="small font-weight-bold text-gray-700">Stok Tersedia</label>
+                                <input type="number" id="stok_barang" class="form-control bg-light" readonly>
                             </div>
                         </div>
 
@@ -102,7 +90,7 @@
                                     required
                                 >
                                 @error('jumlah')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback font-weight-bold">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -121,40 +109,23 @@
                                     required
                                 >
                                 @error('tanggal_transaksi')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback font-weight-bold">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
-
-                        {{-- KODE TRANSAKSI --}}
-                        {{-- <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label class="small font-weight-bold text-gray-700">
-                                    Kode Transaksi <span class="text-danger">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    name="kode_transaksi" 
-                                    class="form-control @error('kode_transaksi') is-invalid @enderror"
-                                    value="{{ old('kode_transaksi') }}"
-                                    required
-                                >
-                                @error('kode_transaksi')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div> --}}
 
                         {{-- TIPE TRANSAKSI --}}
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-gray-700">Tipe Transaksi <span class="text-danger">*</span></label>
-                                {{-- FIXED: Tambahkan id="select-tipe" agar dibaca JS --}}
                                 <select name="tipe_transaksi" id="select-tipe" class="form-control @error('tipe_transaksi') is-invalid @enderror" required>
                                     <option value="">-- Pilih Tipe --</option>
                                     <option value="masuk" {{ old('tipe_transaksi') == 'masuk' ? 'selected' : '' }}>Masuk</option>
                                     <option value="keluar" {{ old('tipe_transaksi') == 'keluar' ? 'selected' : '' }}>Keluar</option>
                                 </select>
+                                @error('tipe_transaksi')
+                                    <div class="invalid-feedback font-weight-bold">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
 
@@ -162,11 +133,14 @@
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-gray-700">Kode Transaksi</label>
-                                {{-- FIXED: ID disesuaikan menjadi kode-transaksi agar sinkron dengan JS --}}
-                                <input type="text" id="kode-transaksi" name="kode_transaksi" class="form-control bg-light" value="{{ old('kode_transaksi') }}" readonly required>
+                                <input type="text" id="kode-transaksi" name="kode_transaksi" 
+                                       class="form-control bg-light @error('kode_transaksi') is-invalid @enderror" 
+                                       value="{{ old('kode_transaksi') }}" readonly required>
+                                @error('kode_transaksi')
+                                    <div class="invalid-feedback font-weight-bold">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
-                                                {{-- <input type="text" id="kode-transaksi" name="kode_transaksi" class="form-control" readonly> --}}
 
                         {{-- LOKASI --}}
                         <div class="col-md-12">
@@ -180,12 +154,12 @@
                                     required
                                 >
                                     <option value="">-- Pilih Lokasi --</option>
-                                    <option value="Jl. Melati No.10, Batubulan">Jl. Melati No.10, Batubulan</option>
-                                    <option value="Jl. Kenanga No.5, Klungkung">Jl. Kenanga No.5, Klungkung</option>
-                                    <option value="Jl. Anggrek No.7, Ubud">Jl. Anggrek No.7, Ubud</option>
+                                    <option value="Shopee" {{ old('lokasi') == 'Shopee' ? 'selected' : '' }}>Shopee</option>
+                                    <option value="Tiktok Shop" {{ old('lokasi') == 'Tiktok Shop' ? 'selected' : '' }}>Tiktok Shop</option>
+                                    <option value="Nephew Riders" {{ old('lokasi') == 'Nephew Riders' ? 'selected' : '' }}>Nephew Riders</option>
                                 </select>
                                 @error('lokasi')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback font-weight-bold">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -193,8 +167,8 @@
                     </div>
                 </div>
 
-                <div class="card-footer bg-white d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary">
+                <div class="card-footer bg-white d-flex justify-content-end border-top">
+                    <button type="submit" class="btn btn-primary shadow-sm px-4">
                         <i class="fas fa-save mr-1"></i> Simpan
                     </button>
                 </div>

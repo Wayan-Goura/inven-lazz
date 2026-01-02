@@ -2,49 +2,108 @@
 
 @section('content')
 
-{{-- resources/views/pages/kel_barang/b_masuk/edit.blade.php --}}
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul> @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach </ul>
-    </div>
-@endif
-<form action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
-    @csrf
-    @method('PUT')
+<div class="container-fluid">
 
-    <div class="row">
-        {{-- Pastikan nama input sesuai dengan $request->validate di controller --}}
-        <div class="col-md-6 mb-3">
-            <label>Nama Barang</label>
-            <select name="data_barang_id" class="form-control">
-                @foreach($barangs as $b)
-                    <option value="{{ $b->id }}" {{ $transaksi->detailTransaksis->first()->data_barang_id == $b->id ? 'selected' : '' }}>
-                        {{ $b->nama_barang }} (Stok: {{ $b->jml_stok }})
-                    </option>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Edit Barang Masuk</h1>
+    </div>
+
+    {{-- Tampilkan Error jika validasi gagal --}}
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
                 @endforeach
-            </select>
+            </ul>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
+    @endif
 
-        <div class="col-md-6 mb-3">
-            <label>Tanggal Transaksi</label>
-            <input type="date" name="tanggal_transaksi" class="form-control" value="{{ $transaksi->tanggal_transaksi }}">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Form Perubahan Transaksi: {{ $transaksi->kode_transaksi }}</h6>
         </div>
+        <div class="card-body">
 
-        <div class="col-md-6 mb-3">
-            <label>Jumlah</label>
-            <input type="number" name="jumlah" class="form-control" value="{{ $transaksi->detailTransaksis->first()->jumlah }}">
-        </div>
+            {{-- FORM EDIT --}}
+            <form action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
+                @csrf
+                @method('PUT')
 
-        <div class="col-md-6 mb-3">
-            <label>Lokasi</label>
-            <input type="text" name="lokasi" class="form-control" value="{{ $transaksi->lokasi }}">
+                <div class="row">
+                    @php 
+                        // Mengambil detail transaksi pertama
+                        $detail = $transaksi->detailTransaksis->first(); 
+                    @endphp
+
+                    <div class="col-md-6 mb-3">
+                        <label class="font-weight-bold">Kode Transaksi</label>
+                        <input type="text" class="form-control bg-light" 
+                               value="{{ $transaksi->kode_transaksi }}" readonly>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="font-weight-bold">Nama Barang</label>
+                        <input type="text" class="form-control bg-light" 
+                               value="{{ $detail->barang->nama_barang ?? 'Barang Terhapus' }}" readonly>
+                        
+                        {{-- ID Barang yang dikirim ke Controller --}}
+                        <input type="hidden" name="data_barang_id" value="{{ $detail->data_barang_id }}">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="font-weight-bold">Merk</label>
+                        <input type="text" class="form-control bg-light" 
+                               value="{{ $detail->barang->merek ?? '-' }}" readonly>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="font-weight-bold">Tanggal Transaksi <span class="text-danger">*</span></label>
+                        <input type="date" name="tanggal_transaksi"
+                               class="form-control @error('tanggal_transaksi') is-invalid @enderror"
+                               value="{{ old('tanggal_transaksi', $transaksi->tanggal_transaksi) }}" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="font-weight-bold">Lokasi <span class="text-danger">*</span></label>
+                        <select name="lokasi" class="form-control @error('lokasi') is-invalid @enderror" required>
+                            <option value="Shopee" {{ old('lokasi', $transaksi->lokasi) == 'Shopee' ? 'selected' : '' }}>Shopee</option>
+                            <option value="Tiktok Shop" {{ old('lokasi', $transaksi->lokasi) == 'Tiktok Shop' ? 'selected' : '' }}>Tiktok Shop</option>
+                            <option value="Nephew Riders" {{ old('lokasi', $transaksi->lokasi) == 'Nephew Riders' ? 'selected' : '' }}>Nephew Riders</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="font-weight-bold">Jumlah Masuk <span class="text-danger">*</span></label>
+                        <input type="number" name="jumlah"
+                               class="form-control @error('jumlah') is-invalid @enderror"
+                               value="{{ old('jumlah', $detail->jumlah) }}" min="1" required>
+                        <small class="text-info mt-1 d-block">
+                            <i class="fas fa-info-circle"></i> Stok saat ini di sistem: <strong>{{ $detail->barang->jml_stok ?? 0 }}</strong>
+                        </small>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-end">
+                    <a href="{{ route('kel_barang.b_masuk.index') }}" class="btn btn-secondary mr-2">
+                        <i class="fas fa-times"></i> Batal
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
+                </div>
+
+            </form>
+
         </div>
     </div>
 
-    <div class="text-right">
-        <a href="{{ route('kel_barang.b_masuk.index') }}" class="btn btn-secondary">Batal</a>
-        <button type="submit" class="btn btn-primary">Update Data</button>
-    </div>
-</form>
+</div>
 
 @endsection
