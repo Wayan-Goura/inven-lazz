@@ -4,81 +4,99 @@
 
 <div class="container-fluid">
 
-    <!-- JUDUL -->
-    <h1 class="h3 mb-4 text-gray-800">Edit Barang Keluar</h1>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Edit Barang Keluar</h1>
+    </div>
 
-    <div class="card shadow">
+    {{-- Tampilkan Error jika validasi gagal atau stok tidak cukup --}}
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    @endif
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Form Perubahan Transaksi: {{ $transaksi->kode_transaksi }}</h6>
+        </div>
         <div class="card-body">
 
             {{-- FORM EDIT --}}
-            <form action="#" method="post">
+            <form action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
                 <div class="row">
+                    @php 
+                        // Mengambil detail transaksi pertama
+                        $detail = $transaksi->detailTransaksis->first(); 
+                    @endphp
 
-                    <!-- KODE BARANG -->
                     <div class="col-md-6 mb-3">
-                        <label>Kode Barang *</label>
-                        <input type="text" name="kode_barang"
-                               class="form-control"
-                               value="BRG001" required>
+                        <label class="font-weight-bold">Kode Transaksi</label>
+                        <input type="text" class="form-control bg-light" 
+                               value="{{ $transaksi->kode_transaksi }}" readonly>
                     </div>
 
-                    <!-- NAMA BARANG -->
                     <div class="col-md-6 mb-3">
-                        <label>Nama Barang *</label>
-                        <input type="text" name="nama_barang"
-                               class="form-control"
-                               value="Bolpoin Hitam" required>
+                        <label class="font-weight-bold">Nama Barang</label>
+                        <input type="text" class="form-control bg-light" 
+                               value="{{ $detail->barang->nama_barang ?? 'Barang Terhapus' }}" readonly>
+                        
+                        {{-- ID Barang yang dikirim ke Controller (WAJIB data_barang_id) --}}
+                        <input type="hidden" name="data_barang_id" value="{{ $detail->data_barang_id }}">
                     </div>
 
-                    <!-- MERK -->
                     <div class="col-md-6 mb-3">
-                        <label>Merk *</label>
-                        <input type="text" name="merk"
-                               class="form-control"
-                               value="Standard" required>
+                        <label class="font-weight-bold">Merk</label>
+                        <input type="text" class="form-control bg-light" 
+                               value="{{ $detail->barang->merek ?? '-' }}" readonly>
                     </div>
 
-                    <!-- TANGGAL -->
                     <div class="col-md-6 mb-3">
-                        <label>Tanggal *</label>
-                        <input type="date" name="tanggal"
-                               class="form-control"
-                               value="2025-01-13" required>
+                        <label class="font-weight-bold">Tanggal Transaksi <span class="text-danger">*</span></label>
+                        <input type="date" name="tanggal_transaksi"
+                               class="form-control @error('tanggal_transaksi') is-invalid @enderror"
+                               value="{{ old('tanggal_transaksi', $transaksi->tanggal_transaksi) }}" required>
                     </div>
 
-                    <!-- LOKASI -->
                     <div class="col-md-6 mb-3">
-                        <label>Lokasi *</label>
-                        <select name="lokasi" class="form-control">
-                            <option value="Ubud" selected>Ubud</option>
-                            <option value="Batubulan">Batubulan</option>
-                            <option value="Klungkung">Klungkung</option>
+                        <label class="font-weight-bold">Lokasi <span class="text-danger">*</span></label>
+                        <select name="lokasi" class="form-control @error('lokasi') is-invalid @enderror" required>
+                            <option value="Shopee" {{ old('lokasi', $transaksi->lokasi) == 'Shopee' ? 'selected' : '' }}>Shopee</option>
+                            <option value="Tiktok Shop" {{ old('lokasi', $transaksi->lokasi) == 'Tiktok Shop' ? 'selected' : '' }}>Tiktok Shop</option>
+                            <option value="Nephew Riders" {{ old('lokasi', $transaksi->lokasi) == 'Nephew Riders' ? 'selected' : '' }}>Nephew Riders</option>
                         </select>
                     </div>
 
-                    <!-- JUMLAH -->
                     <div class="col-md-6 mb-3">
-                        <label>Jumlah *</label>
+                        <label class="font-weight-bold">Jumlah Keluar <span class="text-danger">*</span></label>
                         <input type="number" name="jumlah"
-                               class="form-control"
-                               value="20" required>
+                               class="form-control @error('jumlah') is-invalid @enderror"
+                               value="{{ old('jumlah', $detail->jumlah) }}" min="1" required>
+                        <small class="text-info mt-1 d-block">
+                            <i class="fas fa-info-circle"></i> Stok saat ini di sistem: <strong>{{ $detail->barang->jml_stok ?? 0 }}</strong>
+                        </small>
                     </div>
 
                 </div>
 
-                <!-- BUTTON -->
-                <div class="mt-3">
-                    <button class="btn btn-primary">
-                        <i class="fas fa-save"></i> Update
-                    </button>
+                <hr>
 
-                    <a href="{{ route('barang.keluar.index') }}"
-                       class="btn btn-secondary">
-                        Batal
+                <div class="d-flex justify-content-end">
+                    <a href="{{ route('kel_barang.b_keluar.index') }}" class="btn btn-secondary mr-2">
+                        <i class="fas fa-times"></i> Batal
                     </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Simpan Perubahan
+                    </button>
                 </div>
 
             </form>

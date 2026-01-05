@@ -109,6 +109,8 @@ Route::middleware('auth')->group(function () {
             Route::put('/update/{id}', [TransaksiController::class, 'update'])->name('update');
             Route::delete('/{id}', [TransaksiController::class, 'destroy'])->name('destroy');
             Route::get('/generate-code', [TransaksiController::class, 'getGenerateCode'])->name('generate-code');
+            Route::get('/barang-keluar/cetak-pdf', [TransaksiController::class, 'cetak_keluar_pdf'])->name('cetak_keluar_pdf');
+            Route::get('/barang-masuk/cetak-pdf', [TransaksiController::class, 'cetak_masuk_pdf'])->name('cetak_masuk_pdf');
         });
 
         // DATA BARANG

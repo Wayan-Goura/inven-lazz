@@ -8,6 +8,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Mpdf\Mpdf;
 
 class TransaksiController extends Controller
 {
@@ -47,23 +48,19 @@ class TransaksiController extends Controller
     }
 
     /* =============================
-     * generate kode
+     * GENERATE KODE
      * ============================= */
     public function getGenerateCode(Request $request)
     {
         $tipe = $request->type; // 'masuk' atau 'keluar'
-
-        // Tentukan prefix berdasarkan tipe
         $prefix = ($tipe == 'masuk') ? 'BM' : 'BK';
 
-        // Cari transaksi terakhir dengan tipe yang sama
         $lastTransaksi = Transaksi::where('tipe_transaksi', $tipe)
             ->latest('id')
             ->first();
 
         $lastNumber = 0;
         if ($lastTransaksi && $lastTransaksi->kode_transaksi) {
-            // Mengambil 3 digit terakhir dari kode (contoh: BK-202512-001)
             $lastNumber = intval(substr($lastTransaksi->kode_transaksi, -3));
         }
 
@@ -73,6 +70,7 @@ class TransaksiController extends Controller
             'code' => $newCode
         ]);
     }
+
     /* =============================
      * STORE
      * ============================= */
@@ -132,115 +130,172 @@ class TransaksiController extends Controller
             return back()->withErrors($e->getMessage());
         }
     }
-public function edit($id)
-{
-    $transaksi = Transaksi::with('detailTransaksis.barang')->findOrFail($id);
-    $barangs = DataBarang::all();
-    $categories = Category::all();
 
-    // Sesuaikan dengan struktur folder: pages.kel_barang.b_masuk.edit
-    $folder = ($transaksi->tipe_transaksi === 'masuk') ? 'b_masuk' : 'b_keluar';
-    
-    return view("pages.kel_barang.{$folder}.edit", compact('transaksi', 'barangs', 'categories'));
-}
-// UPDATE
-public function update(Request $request, $id)
-{
-    $request->validate([
-        'tanggal_transaksi' => 'required|date',
-        'data_barang_id' => 'required|exists:data_barangs,id',
-        'jumlah' => 'required|integer|min:1',
-        'lokasi' => 'required|string',
-    ]);
+    /* =============================
+     * EDIT
+     * ============================= */
+    public function edit($id)
+    {
+        $transaksi = Transaksi::with('detailTransaksis.barang')->findOrFail($id);
+        $barangs = DataBarang::all();
+        $categories = Category::all();
 
-    DB::beginTransaction();
-    try {
-        $transaksi = Transaksi::findOrFail($id);
-        $detail = $transaksi->detailTransaksis->first();
+        $folder = ($transaksi->tipe_transaksi === 'masuk') ? 'b_masuk' : 'b_keluar';
+        
+        return view("pages.kel_barang.{$folder}.edit", compact('transaksi', 'barangs', 'categories'));
+    }
 
-        // 1. REVERT STOK LAMA
-        $barangLama = DataBarang::findOrFail($detail->data_barang_id);
-        if ($transaksi->tipe_transaksi === 'masuk') {
-            $barangLama->jml_stok -= $detail->jumlah;
-        } else {
-            $barangLama->increment('jml_stok', $detail->jumlah);
-        }
-        $barangLama->save();
-
-        // 2. APPLY STOK BARU
-        $barangBaru = DataBarang::findOrFail($request->data_barang_id);
-        if ($transaksi->tipe_transaksi === 'keluar' && $barangBaru->jml_stok < $request->jumlah) {
-            throw new \Exception('Stok tidak mencukupi!');
-        }
-
-        if ($transaksi->tipe_transaksi === 'masuk') {
-            $barangBaru->jml_stok += $request->jumlah;
-        } else {
-            $barangBaru->jml_stok -= $request->jumlah;
-        }
-        $barangBaru->save();
-
-        // 3. UPDATE DATA TRANSAKSI UTAMA
-        $transaksi->update([
-            'tanggal_transaksi' => $request->tanggal_transaksi,
-            'total_barang' => $request->jumlah,
-            'lokasi' => $request->lokasi,
+    /* =============================
+     * UPDATE
+     * ============================= */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'tanggal_transaksi' => 'required|date',
+            'data_barang_id' => 'required|exists:data_barangs,id',
+            'jumlah' => 'required|integer|min:1',
+            'lokasi' => 'required|string',
         ]);
 
-        // 4. UPDATE DETAIL TRANSAKSI (MENGGUNAKAN QUERY BUILDER UNTUK MENGHINDARI ERROR 'ID IS NULL')
-        // Ini akan mencari berdasarkan transaksi_id, bukan id primary key detail
-        DB::table('detail_transaksis')
-            ->where('transaksi_id', $transaksi->id)
-            ->update([
-                'data_barang_id' => $request->data_barang_id,
-                'jumlah' => $request->jumlah,
-                'updated_at' => now()
+        DB::beginTransaction();
+        try {
+            $transaksi = Transaksi::findOrFail($id);
+            $detail = $transaksi->detailTransaksis->first();
+
+            // 1. REVERT STOK LAMA
+            $barangLama = DataBarang::findOrFail($detail->data_barang_id);
+            if ($transaksi->tipe_transaksi === 'masuk') {
+                $barangLama->jml_stok -= $detail->jumlah;
+            } else {
+                $barangLama->increment('jml_stok', $detail->jumlah);
+            }
+            $barangLama->save();
+
+            // 2. APPLY STOK BARU
+            $barangBaru = DataBarang::findOrFail($request->data_barang_id);
+            if ($transaksi->tipe_transaksi === 'keluar' && $barangBaru->jml_stok < $request->jumlah) {
+                throw new \Exception('Stok tidak mencukupi!');
+            }
+
+            if ($transaksi->tipe_transaksi === 'masuk') {
+                $barangBaru->jml_stok += $request->jumlah;
+            } else {
+                $barangBaru->jml_stok -= $request->jumlah;
+            }
+            $barangBaru->save();
+
+            // 3. UPDATE DATA TRANSAKSI UTAMA
+            $transaksi->update([
+                'tanggal_transaksi' => $request->tanggal_transaksi,
+                'total_barang' => $request->jumlah,
+                'lokasi' => $request->lokasi,
             ]);
 
-        DB::commit();
+            // 4. UPDATE DETAIL TRANSAKSI
+            DB::table('detail_transaksis')
+                ->where('transaksi_id', $transaksi->id)
+                ->update([
+                    'data_barang_id' => $request->data_barang_id,
+                    'jumlah' => $request->jumlah,
+                    'updated_at' => now()
+                ]);
 
-        // Redirect sesuai route list Anda (transaksi.index tidak ada, gunakan b_masuk/b_keluar)
-        $route = ($transaksi->tipe_transaksi === 'masuk') ? 'kel_barang.b_masuk.index' : 'kel_barang.b_keluar.index';
-        
-        return redirect()->route($route)->with('success', 'Data Berhasil Diperbarui');
+            DB::commit();
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return back()->withErrors($e->getMessage())->withInput();
+            $route = ($transaksi->tipe_transaksi === 'masuk') ? 'kel_barang.b_masuk.index' : 'kel_barang.b_keluar.index';
+            return redirect()->route($route)->with('success', 'Data Berhasil Diperbarui');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors($e->getMessage())->withInput();
+        }
     }
-}
 
     /* =============================
      * DELETE
      * ============================= */
-    public function destroy(Transaksi $transaksi)
-    {
-        DB::beginTransaction();
+    public function destroy($id) // Harus $id sesuai route: /{id}
+{
+    DB::beginTransaction();
+    try {
+        $transaksi = Transaksi::findOrFail($id);
+        $detail = $transaksi->detailTransaksis->first();
+        
 
-        try {
-            $detail = $transaksi->detailTransaksis->first();
+        if ($detail) {
             $barang = DataBarang::find($detail->data_barang_id);
-
-            if ($transaksi->tipe_transaksi === 'masuk') {
-                $barang->decrement('jml_stok', $detail->jumlah);
-            } else {
-                $barang->increment('jml_stok', $detail->jumlah);
+            if ($barang) {
+                // Kembalikan stok
+                if ($transaksi->tipe_transaksi === 'masuk') {
+                    $barang->decrement('jml_stok', $detail->jumlah);
+                } else {
+                    $barang->increment('jml_stok', $detail->jumlah);
+                }
             }
-
-            $detail->delete();
-            $transaksi->delete();
-
-            DB::commit();
-
-            return redirect()->route(
-                $transaksi->tipe_transaksi === 'masuk'
-                    ? 'kel_barang.b_masuk.index'
-                    : 'kel_barang.b_keluar.index'
-            )->with('success', 'Transaksi berhasil dihapus');
-
-        } catch (Exception $e) {
-            DB::rollBack();
-            return back()->withErrors($e->getMessage());
+            DB::table('detail_transaksis')->where('transaksi_id', $id)->delete();
         }
+
+        $tipe = $transaksi->tipe_transaksi;
+        $transaksi->delete();
+
+        DB::commit();
+
+        $route = ($tipe === 'masuk') ? 'kel_barang.b_masuk.index' : 'kel_barang.b_keluar.index';
+        return redirect()->route($route)->with('success', 'Data berhasil dihapus');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->withErrors('Gagal menghapus: ' . $e->getMessage());
+    }
+}
+
+    /* =============================
+     * CETAK PDF BARANG MASUK
+     * ============================= */
+    public function cetak_masuk_pdf()
+    {
+        $transaksis = Transaksi::with(['user', 'detailTransaksis.barang'])
+            ->where('tipe_transaksi', 'masuk')
+            ->get();
+
+        $html = view('pages.kel_barang.b_masuk.cetak_masuk_pdf', [
+            'transaksis' => $transaksis,
+            'title' => 'Laporan Barang Masuk',
+        ])->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_header' => 10,
+            'margin_footer' => 10,
+        ]);
+
+        $mpdf->WriteHTML($html);
+        return $mpdf->Output('laporan_barang_masuk.pdf', 'I');
+    }
+
+    /* =============================
+     * CETAK PDF BARANG KELUAR
+     * ============================= */
+    public function cetak_keluar_pdf()
+    {
+        $transaksis = Transaksi::with(['user', 'detailTransaksis.barang'])
+            ->where('tipe_transaksi', 'keluar')
+            ->get();
+
+        $html = view('pages.kel_barang.b_keluar.cetak_keluar_pdf', [
+            'transaksis' => $transaksis,
+            'title' => 'Laporan Barang Keluar',
+        ])->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_header' => 10,
+            'margin_footer' => 10,
+        ]);
+
+        $mpdf->WriteHTML($html);
+        return $mpdf->Output('laporan_barang_keluar.pdf', 'I');
     }
 }

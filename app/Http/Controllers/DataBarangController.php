@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DataBarang;
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Mpdf\Mpdf;
 
