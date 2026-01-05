@@ -109,10 +109,18 @@
                                 <span class="small">{{ $barang->created_at->format('d M Y') }}</span>
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('barang.edit', $barang->id) }}"
-                                   class="btn btn-sm btn-info mb-1 shadow-sm" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+    @if($barang->is_disetujui)
+        {{-- Jika sedang menunggu persetujuan, tombol edit dinonaktifkan/diganti status --}}
+        <button class="btn btn-sm btn-warning mb-1 shadow-sm" title="Sedang menunggu persetujuan" disabled>
+            <i class="fas fa-clock"></i>
+        </button>
+    @else
+        {{-- Jika normal, tampilkan tombol edit seperti biasa --}}
+        <a href="{{ route('barang.edit', $barang->id) }}"
+           class="btn btn-sm btn-info mb-1 shadow-sm" title="Edit">
+            <i class="fas fa-edit"></i>
+        </a>
+    @endif
 
                                 <form action="{{ route('barang.destroy', $barang->id) }}"
                                       method="POST"

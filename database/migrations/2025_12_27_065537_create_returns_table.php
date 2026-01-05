@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->integer('jumlah_return');
             $table->string('deskripsi')->nullable();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->json('pending_perubahan')->nullable();
+            $table->boolean('is_disetujui')->default(false);
             $table->timestamps();
 
         });

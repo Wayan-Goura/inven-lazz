@@ -27,6 +27,8 @@
                 $table->enum('tipe_transaksi', ['masuk', 'keluar']);
                 $table->integer('total_barang');
                 $table->string ('lokasi', 255);
+                $table->json('pending_perubahan')->nullable();
+                $table->boolean('is_disetujui')->default(false);
                 $table->timestamps();
             });
         }

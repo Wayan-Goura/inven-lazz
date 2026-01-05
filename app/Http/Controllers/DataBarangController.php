@@ -79,14 +79,26 @@ class DataBarangController extends Controller
     public function edit($id)
     {
         $barang = DataBarang::findOrFail($id);
-        $categories = Category::all();
 
+        // Opsional: Admin tidak boleh masuk halaman edit jika barang sedang pending
+        if (auth()->user()->role !== 'super_admin' && $barang->is_disetujui) {
+            return redirect()->route('barang.index')
+                ->with('error', 'Barang ini sedang dalam proses persetujuan dan tidak bisa diubah.');
+        }
+
+        $categories = Category::all();
         return view('pages.barang.edit', compact('barang', 'categories'));
     }
 
     public function update(Request $request, $id)
     {
         $barang = DataBarang::findOrFail($id);
+
+        // Tambahkan Cek: Jika bukan super_admin dan barang sedang pending, cegah update lagi
+        if (auth()->user()->role !== 'super_admin' && $barang->is_disetujui) {
+            return redirect()->route('barang.index')
+                ->with('error', 'Barang ini sedang menunggu persetujuan, tidak dapat diubah kembali.');
+        }
 
         $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
@@ -96,12 +108,49 @@ class DataBarangController extends Controller
             'jml_stok' => 'required|integer|min:0',
         ]);
 
-        $barang->update($validated);
+        if (auth()->user()->role === 'super_admin') {
+            $barang->update(array_merge($validated, [
+                'pending_perubahan' => null,
+                'is_disetujui' => false
+            ]));
+            $msg = 'Barang berhasil diperbarui secara langsung.';
+        } else {
+            $barang->update([
+                'pending_perubahan' => $validated,
+                'is_disetujui' => true
+            ]);
+            $msg = 'Perubahan telah diajukan.';
+        }
 
-        return redirect()
-            ->route('barang.index')
-            ->with('success', 'Barang berhasil diperbarui.');
+        return redirect()->route('barang.index')->with('success', $msg);
     }
+
+    // public function persetujuan(Request $request, $id)
+    // {
+    //     // KOREKSI: Harusnya JIKA BUKAN super_admin maka abort
+    //     if (auth()->user()->role !== 'super_admin') {
+    //         abort(403);
+    //     }
+
+    //     $barang = DataBarang::findOrFail($id);
+
+    //     if ($request->action === 'setuju') {
+    //         // Ambil data dari kolom JSON (pending_perubahan)
+    //         $barang->update(array_merge($barang->pending_perubahan, [
+    //             'pending_perubahan' => null,
+    //             'is_disetujui' => false,
+    //         ]));
+    //         $msg = 'Perubahan disetujui dan diterapkan.';
+    //     } else {
+    //         $barang->update([
+    //             'pending_perubahan' => null,
+    //             'is_disetujui' => false
+    //         ]);
+    //         $msg = 'Perubahan ditolak.';
+    //     }
+
+    //     return redirect()->route('barang.index')->with('success', $msg);
+    // }   
 
     public function destroy(DataBarang $barang)
     {
@@ -129,4 +178,14 @@ class DataBarangController extends Controller
         $mpdf->WriteHTML($html);
         $mpdf->Output('laporan_barang.pdf', 'I');
     }
+
+    // public function request_persetujuan()
+    // {
+    //     // KOREKSI: Pagination() bukan pagination() dan variabel is_disetujui
+    //     $databarang = DataBarang::where('is_disetujui', true)
+    //         ->with('category')
+    //         ->paginate(10); // Gunakan paginate, bukan pagination
+
+    //     return view('pages.persetujuan.index', compact('databarang'));
+    // }
 }

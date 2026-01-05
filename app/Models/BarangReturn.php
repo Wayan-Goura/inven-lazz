@@ -15,6 +15,13 @@ class BarangReturn extends Model
         'jumlah_return',
         'deskripsi',
         'user_id',
+        'pending_perubahan',
+        'is_disetujui',
+    ];
+
+    protected $casts = [
+        'pending_perubahan' => 'array',
+        'is_disetujui' => 'boolean',
     ];
 
 

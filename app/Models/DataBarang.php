@@ -25,6 +25,8 @@ class DataBarang extends Model
         'category_id',
         'k_barang',
         'jml_stok',
+        'pending_perubahan',
+        'is_disetujui',
     ];
 
     /**
@@ -32,6 +34,9 @@ class DataBarang extends Model
      */
     protected $casts = [
         'jml_stok' => 'integer',
+        'pending_perubahan' => 'array',
+        'is_disetujui' => 'boolean',
+
     ];
 
     /**

@@ -77,17 +77,38 @@
                    href="{{ route('kel_barang.b_return.index') }}">
                     Barang Return
                 </a>
-
+                @if(auth()->user()->role === 'super_admin')
                 <a class="collapse-item {{ request()->routeIs('kel_barang.catagory.*') ? 'active' : '' }}"
                    href="{{ route('kel_barang.catagory.index') }}">
                     Kategori
                 </a>
+                @endif
             </div>
         </div>
     </li>
 
+    <!-- persetujuan -->
+    @php
+    $totalPersetujuan = \App\Models\DataBarang::where('is_disetujui', true)->count() +
+                       \App\Models\Transaksi::where('is_disetujui', true)->count() +
+                       \App\Models\BarangReturn::where('is_disetujui', true)->count();
+    @endphp
+
+<li class="nav-item {{ request()->routeIs('persetujuan.index') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('persetujuan.index') }}">
+        <i class="fas fa-fw fa-users-cog"></i>
+        <span>Persetujuan</span>
+        @if($totalPersetujuan > 0)
+            <span class="badge badge-danger badge-counter" style="font-size: 16px; margin-left: 5px;">
+                {{ $totalPersetujuan > 9 ? '9+' : $totalPersetujuan }}
+            </span>
+        @endif
+    </a>
+</li>
+    
+
     <!-- KELOLA ADMIN -->
-    @if(auth()->user()->role === 'super_admin')
+    @if(auth()->user()->role === 'super_admin');
     <li class="nav-item {{ request()->routeIs('kel_role.*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('kel_role.index') }}">
             <i class="fas fa-fw fa-users-cog"></i>

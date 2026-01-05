@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BarangReturnController;
+use App\Http\Controllers\PersetujuanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,17 @@ Route::middleware('auth')->group(function () {
             Route::put('/{user}', [UserController::class, 'update'])->name('update');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
         });
+
+        Route::prefix('kel_barang/catagory')->name('kel_barang.catagory.')->group(function () {
+            Route::get('/', [CategoryController::class, 'index'])->name('index');
+            Route::get('/create', [CategoryController::class, 'create'])->name('create');
+            Route::post('/', [CategoryController::class, 'store'])->name('store');
+            Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+            Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+            Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+        });
+
+
     });
 
     /*
@@ -102,18 +114,20 @@ Route::middleware('auth')->group(function () {
         // DATA BARANG
         Route::resource('barang', DataBarangController::class)->except(['show']);
 
+        // data persetujuan
+        Route::middleware(['auth'])->group(function () {
+            Route::get('/persetujuan', [PersetujuanController::class, 'index'])->name('persetujuan.index');
+            Route::post('/persetujuan/proses/{type}/{id}', [PersetujuanController::class, 'proses'])->name('persetujuan.proses');
+        });
+        // Route::get('persetujuan.index', [DataBarangController::class, 'request_persetujuan'])
+        //     ->name('persetujuan.index');
+        // Route::post('/barang/{id}/persetujuan', [DataBarangController::class, 'persetujuan'])
+        //     ->name('persetujuan.index');
+
+
         Route::get('barang/pdf-mpdf', [DataBarangController::class, 'cetak_pdf'])
             ->name('barang.cetak_pdf');
 
-        // KATEGORI
-        Route::prefix('kel_barang/catagory')->name('kel_barang.catagory.')->group(function () {
-            Route::get('/', [CategoryController::class, 'index'])->name('index');
-            Route::get('/create', [CategoryController::class, 'create'])->name('create');
-            Route::post('/', [CategoryController::class, 'store'])->name('store');
-            Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
-            Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
-            Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
-        });
 
         Route::get('/profile', fn() => view('pages.profile'))->name('profile');
     });

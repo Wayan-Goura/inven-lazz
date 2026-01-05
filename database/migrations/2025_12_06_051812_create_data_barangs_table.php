@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->string('k_barang')->unique();
             $table->string('lokasi_gudang')->nullable();
             $table->integer('jml_stok');
+            $table->json('pending_perubahan')->nullable();
+            $table->boolean('is_disetujui')->default(false);
             $table->timestamps();
         });
     }

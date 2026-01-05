@@ -20,11 +20,15 @@ class Transaksi extends Model
         'tipe_transaksi',
         'total_barang',
         'lokasi',
+        'pending_perubahan',
+        'is_disetujui',
     ];
 
     // Konversi tipe data
     protected $casts = [
         'tanggal_transaksi' => 'datetime',
+        'pending_perubahan' => 'array',
+        'is_disetujui' => 'boolean',
     ];
 
     /**
