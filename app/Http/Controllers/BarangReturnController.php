@@ -11,19 +11,12 @@ use Illuminate\Support\Facades\Auth;
 
 class BarangReturnController extends Controller
 {
-    /**
-     * Menampilkan daftar semua catatan return.
-     */
     public function index()
     {
-        // Variabel disesuaikan dengan view: $barangReturn
         $barangReturn = BarangReturn::with(['barang', 'category', 'user'])->latest()->get();
         return view('pages.kel_barang.b_return.index', compact('barangReturn'));
     }
 
-    /**
-     * Menampilkan form untuk mencatat return baru.
-     */
     public function create()
     {
         $barangs = DataBarang::all();
@@ -31,16 +24,13 @@ class BarangReturnController extends Controller
         return view('pages.kel_barang.b_return.create', compact('barangs', 'categories'));
     }
 
-    /**
-     * Menyimpan data return ke database.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'barang_id' => 'required|exists:data_barangs,id',
             'category_id' => 'required|exists:categories,id',
-            'tanggal_return' => 'required|date', // Perbaikan typo: return (bukan retrun)
-            'jumlah_return' => 'required|integer|min:1', // Perbaikan typo: return
+            'tanggal_return' => 'required|date',
+            'jumlah_return' => 'required|integer|min:1',
             'deskripsi' => 'nullable|string',
         ]);
 
@@ -52,6 +42,7 @@ class BarangReturnController extends Controller
             'deskripsi' => $request->deskripsi,
             'user_id' => Auth::id(),
         ]);
+
         return redirect()->route('kel_barang.b_return.index')->with('success', 'Catatan return berhasil disimpan.');
     }
 
@@ -74,18 +65,24 @@ class BarangReturnController extends Controller
             'deskripsi' => 'nullable|string',
         ]);
 
-        $return = BarangReturn::findOrFail($id);
+        try {
+            $return = BarangReturn::findOrFail($id);
+            
+            // Lakukan update
+            $return->update([
+                'barang_id' => $request->barang_id,
+                'category_id' => $request->category_id,
+                'tanggal_return' => $request->tanggal_return,
+                'jumlah_return' => $request->jumlah_return,
+                'deskripsi' => $request->deskripsi,
+                'user_id' => Auth::id() ?? $return->user_id,
+            ]);
 
-        $return->update([
-            'barang_id' => $request->barang_id,
-            'category_id' => $request->category_id,
-            'tanggal_return' => $request->tanggal_return,
-            'jumlah_return' => $request->jumlah_return,
-            'deskripsi' => $request->deskripsi,
-            'user_id' => Auth::id(),
-        ]);
-
-        return redirect()->route('kel_barang.b_return.index')->with('success', 'Catatan return berhasil diperbarui.');
+            return redirect()->route('kel_barang.b_return.index')->with('success', 'Catatan return berhasil diperbarui.');
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['msg' => 'Gagal mengupdate: ' . $e->getMessage()]);
+        }
     }
 
     public function destroy($id)

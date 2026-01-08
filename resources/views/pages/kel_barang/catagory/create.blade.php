@@ -11,7 +11,7 @@
                 </div>
 
                 <div class="card-body">
-                    <form action="{{ route('kel_barang.catagory.store') }}" method="POST">
+                    <form id="formCreateCategory" action="{{ route('kel_barang.catagory.store') }}" method="POST">
                         @csrf
 
                         {{-- Nama Category --}}
@@ -26,6 +26,7 @@
                                 class="form-control @error('nama_category') is-invalid @enderror"
                                 value="{{ old('nama_category') }}"
                                 placeholder="Masukkan nama category"
+                                required
                             >
                             @error('nama_category')
                                 <div class="invalid-feedback">
@@ -59,7 +60,7 @@
                                 Kembali
                             </a>
 
-                            <button type="submit" class="btn btn-primary">
+                            <button type="button" class="btn btn-primary" onclick="confirmSave()">
                                 Simpan Category
                             </button>
                         </div>
@@ -71,4 +72,31 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmSave() {
+    const name = document.getElementById('nama_category').value;
+    
+    if (!name) {
+        Swal.fire('Oops!', 'Nama kategori wajib diisi.', 'error');
+        return;
+    }
+
+    Swal.fire({
+        title: 'Simpan Kategori?',
+        text: "Pastikan nama kategori sudah sesuai.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4e73df',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Simpan!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('formCreateCategory').submit();
+        }
+    });
+}
+</script>
 @endsection

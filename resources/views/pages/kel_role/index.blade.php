@@ -2,6 +2,12 @@
 
 @section('content')
 <div class="container-fluid">
+    {{-- Notifikasi SweetAlert2 --}}
+    @if(session('success'))
+        <script>
+            Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", showConfirmButton: false, timer: 2000 });
+        </script>
+    @endif
 
     <h1 class="h3 mb-4 text-gray-800">Kelola Admin</h1>
 
@@ -9,20 +15,12 @@
         <i class="fas fa-plus"></i> Tambah Admin
     </a>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-
     <div class="card shadow">
         <div class="card-body table-responsive">
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>No</th>
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Role</th>
@@ -39,18 +37,14 @@
                             <span class="badge badge-info">{{ strtoupper($user->role) }}</span>
                         </td>
                         <td>
-                            <a href="{{ route('kel_role.edit', $user->id) }}"
-                               class="btn btn-sm btn-primary">
+                            <a href="{{ route('kel_role.edit', $user->id) }}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-edit"></i>
                             </a>
 
-                            <form action="{{ route('kel_role.destroy', $user->id) }}"
-                                  method="POST"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Yakin hapus admin ini?')">
+                            <form id="delete-form-{{ $user->id }}" action="{{ route('kel_role.destroy', $user->id) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button class="btn btn-sm btn-danger">
+                                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('{{ $user->id }}', '{{ $user->name }}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
@@ -59,10 +53,29 @@
                     @endforeach
                 </tbody>
             </table>
-
             {{ $users->links() }}
         </div>
     </div>
-
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDelete(id, name) {
+    Swal.fire({
+        title: 'Hapus Admin?',
+        text: "Anda akan menghapus akun admin: " + name,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    });
+}
+</script>
 @endsection

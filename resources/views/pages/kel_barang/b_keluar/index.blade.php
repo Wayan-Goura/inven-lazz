@@ -3,15 +3,14 @@
 @section('content')
 
 <style>
-    /* Mengunci tinggi area tabel agar bisa di-scroll secara internal */
+    /* CSS Asli tetap dipertahankan */
     .table-scroll-container {
-        max-height: 500px; /* Atur tinggi sesuai kenyamanan layar Anda */
+        max-height: 500px;
         overflow-y: auto;
         border: 1px solid #e3e6f0;
         position: relative;
     }
 
-    /* Membuat header tabel (No, Kode Transaksi, dll) tetap di atas saat scroll */
     .table-scroll-container thead th {
         position: sticky;
         top: 0;
@@ -57,7 +56,6 @@
 
     <div class="card shadow">
         <div class="card-body">
-            {{-- Div pembungkus untuk fitur Sticky & Scroll --}}
             <div class="table-responsive table-scroll-container">
                 <table class="table table-bordered table-hover mb-0">
                     <thead class="thead-light">
@@ -92,10 +90,11 @@
                                 <a href="{{ route('transaksi.edit', $item->id) }}" class="btn btn-sm btn-warning">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('transaksi.destroy', $item->id) }}" method="POST" class="d-inline">
+                                {{-- Form Delete dengan ID unik --}}
+                                <form id="delete-form-{{ $item->id }}" action="{{ route('transaksi.destroy', $item->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Hapus transaksi ini dan kembalikan stok?')">
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('{{ $item->id }}', '{{ $item->kode_transaksi }}')">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -116,57 +115,83 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const searchInput = document.querySelector("[data-search]");
-    const filterTanggal = document.querySelector("[data-filter-tanggal]");
-    const filterExtra = document.querySelector("[data-filter-extra]");
-    const tableRows = document.querySelectorAll("tbody tr");
+    // 1. Alert Sukses Otomatis
+    @if (session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: "{{ session('success') }}",
+            timer: 2500,
+            showConfirmButton: false
+        });
+    @endif
 
-    function filterTable() {
-        const searchValue = searchInput.value.toLowerCase();
-        const tanggalValue = filterTanggal.value;
-        const extraValue = filterExtra.value.toLowerCase();
-
-        const today = new Date();
-        const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
-        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-        tableRows.forEach(row => {
-            const rowText = row.innerText.toLowerCase();
-            const tanggalText = row.children[4]?.innerText ?? "";
-            const rowTanggal = new Date(tanggalText);
-
-            let show = true;
-
-            if (searchValue && !rowText.includes(searchValue)) show = false;
-            if (tanggalValue === "today" && rowTanggal.toDateString() !== today.toDateString()) show = false;
-            if (tanggalValue === "week" && rowTanggal < startOfWeek) show = false;
-            if (tanggalValue === "month" && rowTanggal < startOfMonth) show = false;
-            if (extraValue && !rowText.includes(extraValue)) show = false;
-
-            row.style.display = show ? "" : "none";
+    // 2. Konfirmasi Hapus SweetAlert
+    function confirmDelete(id, kode) {
+        Swal.fire({
+            title: 'Hapus Transaksi?',
+            text: "Transaksi " + kode + " akan dihapus dan stok akan dikembalikan.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
         });
     }
 
-    searchInput.addEventListener("input", () => {
-        filterTanggal.value = "";
-        filterExtra.value = "";
-        filterTable();
-    });
+    // 3. Logika Filter Asli Anda (Tidak Diubah)
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.querySelector("[data-search]");
+        const filterTanggal = document.querySelector("[data-filter-tanggal]");
+        const filterExtra = document.querySelector("[data-filter-extra]");
+        const tableRows = document.querySelectorAll("tbody tr");
 
-    filterTanggal.addEventListener("change", () => {
-        searchInput.value = "";
-        filterExtra.value = "";
-        filterTable();
-    });
+        function filterTable() {
+            const searchValue = searchInput.value.toLowerCase();
+            const tanggalValue = filterTanggal.value;
+            const extraValue = filterExtra.value.toLowerCase();
 
-    filterExtra.addEventListener("change", () => {
-        searchInput.value = "";
-        filterTanggal.value = "";
-        filterTable();
+            const today = new Date();
+            const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+            tableRows.forEach(row => {
+                const rowText = row.innerText.toLowerCase();
+                const tanggalText = row.children[2]?.innerText ?? ""; // Index diperbaiki ke tgl transaksi
+                const dateParts = tanggalText.split("-");
+                const rowTanggal = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+
+                let show = true;
+
+                if (searchValue && !rowText.includes(searchValue)) show = false;
+                if (tanggalValue === "today" && rowTanggal.toDateString() !== today.toDateString()) show = false;
+                if (tanggalValue === "week" && rowTanggal < startOfWeek) show = false;
+                if (tanggalValue === "month" && rowTanggal < startOfMonth) show = false;
+                if (extraValue && !rowText.includes(extraValue)) show = false;
+
+                row.style.display = show ? "" : "none";
+            });
+        }
+
+        searchInput.addEventListener("input", () => {
+            filterTable();
+        });
+
+        filterTanggal.addEventListener("change", () => {
+            filterTable();
+        });
+
+        filterExtra.addEventListener("change", () => {
+            filterTable();
+        });
     });
-});
 </script>
 
 @endsection

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\Category;
-use App\Models\DataBarang;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class BarangReturn extends Model
 {
-    public $fillable = [
+    use HasFactory;
+
+    // Gunakan protected agar mass assignment diizinkan oleh Laravel
+    protected $fillable = [
         'barang_id',
         'category_id',
         'tanggal_return',
@@ -24,20 +26,21 @@ class BarangReturn extends Model
         'is_disetujui' => 'boolean',
     ];
 
-
+    // Relasi ke Category
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
 
+    // Relasi ke User
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
+    // Relasi ke DataBarang (Pastikan foreign key barang_id tertulis)
     public function barang()
     {
-        return $this->belongsTo(DataBarang::class);
+        return $this->belongsTo(DataBarang::class, 'barang_id');
     }
-
 }

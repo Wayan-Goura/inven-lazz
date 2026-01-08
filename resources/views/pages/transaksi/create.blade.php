@@ -3,17 +3,33 @@
 
 <div class="container-fluid">
 
-    {{-- ALERT ERROR (Hanya untuk pesan manual/stok kurang dari Controller) --}}
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-exclamation-circle mr-1"></i> {{ session('error') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+    {{-- SweetAlert Notifikasi Sukses/Error dari Session --}}
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            });
+        </script>
     @endif
 
-    {{-- Pesan Peringatan Umum Dihapus (Diganti Pesan Spesifik di Bawah Input) --}}
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#4e73df'
+                });
+            });
+        </script>
+    @endif
 
     <div class="mx-auto" style="max-width: 900px;">
         <div class="card shadow">
@@ -23,7 +39,8 @@
                 </h6>
             </div>
 
-            <form action="{{ route('transaksi.store') }}" method="POST">
+            {{-- Menambahkan ID pada form agar bisa dipanggil oleh JavaScript --}}
+            <form id="formTransaksi" action="{{ route('transaksi.store') }}" method="POST">
                 @csrf
 
                 <div class="card-body" style="max-height: calc(100vh - 260px); overflow-y: auto;">
@@ -53,7 +70,6 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                {{-- PESAN ERROR SPESIFIK --}}
                                 @error('data_barang_id')
                                     <div class="invalid-feedback font-weight-bold">{{ $message }}</div>
                                 @enderror
@@ -84,6 +100,7 @@
                                 <input 
                                     type="number" 
                                     name="jumlah" 
+                                    id="jumlah_input"
                                     min="1"
                                     class="form-control @error('jumlah') is-invalid @enderror"
                                     value="{{ old('jumlah') }}"
@@ -168,7 +185,7 @@
                 </div>
 
                 <div class="card-footer bg-white d-flex justify-content-end border-top">
-                    <button type="submit" class="btn btn-primary shadow-sm px-4">
+                    <button type="button" class="btn btn-primary shadow-sm px-4" onclick="confirmTransaksi()">
                         <i class="fas fa-save mr-1"></i> Simpan
                     </button>
                 </div>
@@ -178,7 +195,40 @@
 </div>
 
 {{-- SCRIPT --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// Fungsi Alert Konfirmasi
+function confirmTransaksi() {
+    const tipe = document.getElementById('select-tipe').value;
+    const barang = document.getElementById('data_barang_id').options[document.getElementById('data_barang_id').selectedIndex].text;
+    const jumlah = document.getElementById('jumlah_input').value;
+
+    if (!tipe || !jumlah || document.getElementById('data_barang_id').value == "") {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Harap lengkapi semua field yang berbintang (*)'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Konfirmasi Transaksi',
+        html: `Apakah Anda yakin ingin menyimpan transaksi <b>${tipe.toUpperCase()}</b> <br> untuk barang <b>${barang}</b> sebanyak <b>${jumlah}</b>?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4e73df',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Simpan!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('formTransaksi').submit();
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     // --- Bagian 1: Generate Kode Transaksi Otomatis ---
     const selectTipe = document.getElementById('select-tipe');
@@ -191,7 +241,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (tipe) {
                 inputKodeTrx.value = 'Memuat kode...';
 
-                // AJAX Fetch ke Controller
                 fetch(`{{ route('transaksi.generate-code') }}?type=${tipe}`)
                     .then(response => {
                         if (!response.ok) throw new Error('Gagal memuat data');
@@ -203,14 +252,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     .catch(error => {
                         console.error('Error:', error);
                         inputKodeTrx.value = 'Gagal memuat kode';
-                        alert('Terjadi kesalahan saat mengambil kode transaksi.');
+                        Swal.fire('Error', 'Terjadi kesalahan saat mengambil kode transaksi.', 'error');
                     });
             } else {
                 inputKodeTrx.value = '';
             }
         });
 
-        // Jalankan jika ada nilai lama (misal saat validasi error)
         if (selectTipe.value && !inputKodeTrx.value) {
             selectTipe.dispatchEvent(new Event('change'));
         }
@@ -231,14 +279,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             
-            // Ambil dari atribut data-kode dan data-stok
             kodeBarang.value = opt.getAttribute('data-kode') || '';
             stokBarang.value = opt.getAttribute('data-stok') || '0';
         }
 
         selectBarang.addEventListener('change', updateDetailBarang);
         
-        // Jalankan saat pertama kali load (untuk menangani 'old' value)
         if(selectBarang.value) updateDetailBarang();
     }
 });

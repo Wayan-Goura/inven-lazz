@@ -37,6 +37,8 @@
 
 <div class="container-fluid">
     <h1 class="h3 mb-4 text-gray-800">Barang Masuk</h1>
+    
+    {{-- Bagian Success Alert Lama Dihapus, diganti ke Script di bawah --}}
 
     <div class="card shadow mb-4">
         <div class="card-body d-flex justify-content-between flex-wrap gap-2">
@@ -105,10 +107,13 @@
                                     <a href="{{ route('transaksi.edit', $item->id) }}" class="btn btn-sm btn-warning">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('transaksi.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data transaksi ini?')">
+                                    
+                                    <form id="delete-form-{{ $item->id }}" action="{{ route('transaksi.destroy', $item->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('{{ $item->id }}', '{{ $item->kode_transaksi }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
                                 </td>
                             </tr>
@@ -126,43 +131,75 @@
     </div>
 </div>
 
+{{-- SCRIPT SWEETALERT & FILTER --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const searchInput = document.querySelector("[data-search]");
-    const filterTanggal = document.querySelector("[data-filter-tanggal]");
-    const filterExtra = document.querySelector("[data-filter-extra]");
-    const tableRows = document.querySelectorAll("tbody tr");
+    // 1. TRIGGER SWEETALERT SUCCESS SAAT HALAMAN DIBUKA
+    @if (session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: "{{ session('success') }}",
+            timer: 3000,
+            showConfirmButton: false
+        });
+    @endif
 
-    function filterTable() {
-        const searchValue = searchInput.value.toLowerCase();
-        const tanggalValue = filterTanggal.value;
-        const extraValue = filterExtra.value.toLowerCase();
-
-        const today = new Date();
-        const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
-        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-        tableRows.forEach(row => {
-            const rowText = row.innerText.toLowerCase();
-            const tanggalText = row.children[2]?.innerText ?? ""; 
-            const dateParts = tanggalText.split("-");
-            const rowTanggal = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-
-            let show = true;
-            if (searchValue && !rowText.includes(searchValue)) show = false;
-            if (tanggalValue === "today" && rowTanggal.toDateString() !== today.toDateString()) show = false;
-            if (tanggalValue === "week" && rowTanggal < startOfWeek) show = false;
-            if (tanggalValue === "month" && rowTanggal < startOfMonth) show = false;
-            if (extraValue && !rowText.includes(extraValue)) show = false;
-
-            row.style.display = show ? "" : "none";
+    // 2. FUNGSI SWEETALERT UNTUK KONFIRMASI HAPUS
+    function confirmDelete(id, kode) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Data transaksi " + kode + " akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74a3b',
+            cancelButtonColor: '#858796',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + id).submit();
+            }
         });
     }
 
-    searchInput.addEventListener("input", filterTable);
-    filterTanggal.addEventListener("change", filterTable);
-    filterExtra.addEventListener("change", filterTable);
-});
+    // 3. FUNGSI FILTER TABEL ASLI
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.querySelector("[data-search]");
+        const filterTanggal = document.querySelector("[data-filter-tanggal]");
+        const filterExtra = document.querySelector("[data-filter-extra]");
+        const tableRows = document.querySelectorAll("tbody tr");
+
+        function filterTable() {
+            const searchValue = searchInput.value.toLowerCase();
+            const tanggalValue = filterTanggal.value;
+            const extraValue = filterExtra.value.toLowerCase();
+
+            const today = new Date();
+            const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+            tableRows.forEach(row => {
+                const rowText = row.innerText.toLowerCase();
+                const tanggalText = row.children[2]?.innerText ?? ""; 
+                const dateParts = tanggalText.split("-");
+                const rowTanggal = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+
+                let show = true;
+                if (searchValue && !rowText.includes(searchValue)) show = false;
+                if (tanggalValue === "today" && rowTanggal.toDateString() !== today.toDateString()) show = false;
+                if (tanggalValue === "week" && rowTanggal < startOfWeek) show = false;
+                if (tanggalValue === "month" && rowTanggal < startOfMonth) show = false;
+                if (extraValue && !rowText.includes(extraValue)) show = false;
+
+                row.style.display = show ? "" : "none";
+            });
+        }
+
+        searchInput.addEventListener("input", filterTable);
+        filterTanggal.addEventListener("change", filterTable);
+        filterExtra.addEventListener("change", filterTable);
+    });
 </script>
 
 @endsection

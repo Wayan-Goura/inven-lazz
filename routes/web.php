@@ -120,6 +120,7 @@ Route::middleware('auth')->group(function () {
         Route::middleware(['auth'])->group(function () {
             Route::get('/persetujuan', [PersetujuanController::class, 'index'])->name('persetujuan.index');
             Route::post('/persetujuan/proses/{type}/{id}', [PersetujuanController::class, 'proses'])->name('persetujuan.proses');
+            Route::get('/persetujuan/{type}/{id}/detail', [PersetujuanController::class, 'detail'])->name('persetujuan.detail');
         });
         // Route::get('persetujuan.index', [DataBarangController::class, 'request_persetujuan'])
         //     ->name('persetujuan.index');

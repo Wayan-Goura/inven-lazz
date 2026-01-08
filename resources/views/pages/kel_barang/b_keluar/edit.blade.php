@@ -8,9 +8,9 @@
         <h1 class="h3 mb-0 text-gray-800">Edit Barang Keluar</h1>
     </div>
 
-    {{-- Tampilkan Error jika validasi gagal atau stok tidak cukup --}}
+    {{-- Error Alert tetap dipertahankan dengan gaya shadow --}}
     @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show shadow mb-4" role="alert">
             <ul class="mb-0">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -28,14 +28,13 @@
         </div>
         <div class="card-body">
 
-            {{-- FORM EDIT --}}
-            <form action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
+            {{-- Menambahkan id="formEditKeluar" --}}
+            <form id="formEditKeluar" action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
                 <div class="row">
                     @php 
-                        // Mengambil detail transaksi pertama
                         $detail = $transaksi->detailTransaksis->first(); 
                     @endphp
 
@@ -50,7 +49,6 @@
                         <input type="text" class="form-control bg-light" 
                                value="{{ $detail->barang->nama_barang ?? 'Barang Terhapus' }}" readonly>
                         
-                        {{-- ID Barang yang dikirim ke Controller (WAJIB data_barang_id) --}}
                         <input type="hidden" name="data_barang_id" value="{{ $detail->data_barang_id }}">
                     </div>
 
@@ -94,7 +92,8 @@
                     <a href="{{ route('kel_barang.b_keluar.index') }}" class="btn btn-secondary mr-2">
                         <i class="fas fa-times"></i> Batal
                     </a>
-                    <button type="submit" class="btn btn-primary">
+                    {{-- Ubah type submit ke button agar trigger JS --}}
+                    <button type="button" class="btn btn-primary" onclick="confirmUpdate()">
                         <i class="fas fa-save"></i> Simpan Perubahan
                     </button>
                 </div>
@@ -103,7 +102,33 @@
 
         </div>
     </div>
-
 </div>
+
+{{-- Tambahkan script SweetAlert di bawah --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmUpdate() {
+        const form = document.getElementById('formEditKeluar');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        Swal.fire({
+            title: 'Simpan Perubahan?',
+            text: "Pastikan data transaksi sudah benar.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4e73df',
+            cancelButtonColor: '#858796',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    }
+</script>
 
 @endsection

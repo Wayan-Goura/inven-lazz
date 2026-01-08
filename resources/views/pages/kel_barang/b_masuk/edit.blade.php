@@ -10,12 +10,18 @@
 
     {{-- Tampilkan Error jika validasi gagal --}}
     @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+        <div class="alert alert-danger alert-dismissible fade show shadow mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle mr-3 fa-lg"></i>
+                <div>
+                    <strong>Perhatian!</strong>
+                    <ul class="mb-0 small">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -28,14 +34,13 @@
         </div>
         <div class="card-body">
 
-            {{-- FORM EDIT --}}
-            <form action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
+            {{-- FORM EDIT DENGAN ID UNTUK SWEETALERT --}}
+            <form id="formEditMasuk" action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
                 <div class="row">
                     @php 
-                        // Mengambil detail transaksi pertama
                         $detail = $transaksi->detailTransaksis->first(); 
                     @endphp
 
@@ -50,7 +55,6 @@
                         <input type="text" class="form-control bg-light" 
                                value="{{ $detail->barang->nama_barang ?? 'Barang Terhapus' }}" readonly>
                         
-                        {{-- ID Barang yang dikirim ke Controller --}}
                         <input type="hidden" name="data_barang_id" value="{{ $detail->data_barang_id }}">
                     </div>
 
@@ -94,7 +98,8 @@
                     <a href="{{ route('kel_barang.b_masuk.index') }}" class="btn btn-secondary mr-2">
                         <i class="fas fa-times"></i> Batal
                     </a>
-                    <button type="submit" class="btn btn-primary">
+                    {{-- UBAH TYPE KE BUTTON AGAR TRIGGER SWEETALERT --}}
+                    <button type="button" class="btn btn-primary" onclick="confirmUpdate()">
                         <i class="fas fa-save"></i> Simpan Perubahan
                     </button>
                 </div>
@@ -105,5 +110,34 @@
     </div>
 
 </div>
+
+{{-- SCRIPT SWEETALERT --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmUpdate() {
+        const form = document.getElementById('formEditMasuk');
+        
+        // Cek validasi HTML5 (required dsb) sebelum muncul alert
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        Swal.fire({
+            title: 'Simpan Perubahan?',
+            text: "Pastikan data transaksi sudah benar sebelum disimpan.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4e73df',
+            cancelButtonColor: '#858796',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    }
+</script>
 
 @endsection

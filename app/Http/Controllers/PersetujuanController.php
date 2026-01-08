@@ -20,21 +20,32 @@ class PersetujuanController extends Controller
 
         $data = [
             'barang' => DataBarang::where('is_disetujui', true)->with('category')->get(),
-            'masuk' => Transaksi::where('is_disetujui', true)->where('tipe_transaksi', 'masuk')->with('dataBarang')->get(),
+            'masuk'  => Transaksi::where('is_disetujui', true)->where('tipe_transaksi', 'masuk')->with('dataBarang')->get(),
             'keluar' => Transaksi::where('is_disetujui', true)->where('tipe_transaksi', 'keluar')->with('dataBarang')->get(),
             'return' => BarangReturn::where('is_disetujui', true)->with('dataBarang')->get(),
         ];
 
-        // Menghitung total semua permintaan untuk notifikasi
         $totalPersetujuan = $data['barang']->count() + $data['masuk']->count() + $data['keluar']->count() + $data['return']->count();
 
         return view('pages.persetujuan.index', compact('data', 'totalPersetujuan'));
     }
 
     /**
+     * Menampilkan detail perubahan data (Data Lama vs Data Baru)
+     */
+    public function detail($type, $id)
+    {
+        if (auth()->user()->role !== 'super_admin') {
+            abort(403);
+        }
+
+        $item = $this->resolveModel($type, $id);
+
+        return view('pages.persetujuan.detail', compact('item', 'type'));
+    }
+
+    /**
      * Memproses Setuju atau Tolak
-     * @param string $type (barang|masuk|keluar|return)
-     * @param int $id
      */
     public function proses(Request $request, $type, $id)
     {
@@ -42,37 +53,27 @@ class PersetujuanController extends Controller
             abort(403);
         }
 
-        $modelClass = match ($type) {
-            'barang' => DataBarang::class,
-            'masuk' => Transaksi::class,
-            'keluar' => Transaksi::class,
-            'return' => BarangReturn::class,
-            default => abort(404),
-        };
-
-        $item = $modelClass::findOrFail($id);
+        $item = $this->resolveModel($type, $id);
 
         if ($request->action === 'setuju') {
-            // Ambil data baru dari JSON
             $newData = $item->pending_perubahan;
 
-            // LOGIKA UPDATE STOK OTOMATIS (Jika tipe adalah transaksi)
+            // Logika Update Stok Otomatis (Tetap sesuai aslinya)
             if (in_array($type, ['masuk', 'keluar', 'return'])) {
                 $barang = DataBarang::find($item->data_barang_id);
 
                 if ($barang) {
-                    // 1. Kembalikan stok lama dulu (Undo transaksi lama)
+                    // 1. Undo stok lama
                     if ($type === 'masuk') {
-                        $barang->decrement('jml_stok', $item->jumlah); // jumlah adalah nama kolom stok di tabel transaksi
+                        $barang->decrement('jml_stok', $item->jumlah);
                     } elseif ($type === 'keluar' || $type === 'return') {
                         $barang->increment('jml_stok', $item->jumlah);
                     }
 
-                    // 2. Terapkan stok baru dari data yang disetujui
+                    // 2. Terapkan stok baru
                     if ($type === 'masuk') {
                         $barang->increment('jml_stok', $newData['jumlah']);
                     } elseif ($type === 'keluar' || $type === 'return') {
-                        // Cek jika stok cukup untuk barang keluar
                         if ($type === 'keluar' && $barang->jml_stok < $newData['jumlah']) {
                             return back()->with('error', 'Gagal! Stok tidak mencukupi untuk menyetujui pengeluaran ini.');
                         }
@@ -81,13 +82,18 @@ class PersetujuanController extends Controller
                 }
             }
 
-            // Terapkan perubahan ke tabel transaksi/barang itu sendiri
-            $item->update(array_merge($newData, [
-                'pending_perubahan' => null,
-                'is_disetujui' => false,
-            ]));
-
-            $message = "Perubahan $type disetujui dan stok telah diperbarui.";
+            // Cek apakah ini permintaan hapus (Delete)
+            if (isset($newData['is_delete']) && $newData['is_delete'] == true) {
+                $item->delete();
+                $message = "Data $type berhasil dihapus.";
+            } else {
+                // Terapkan update
+                $item->update(array_merge($newData, [
+                    'pending_perubahan' => null,
+                    'is_disetujui' => false,
+                ]));
+                $message = "Perubahan $type disetujui dan data telah diperbarui.";
+            }
         } else {
             // Jika Tolak
             $item->update([
@@ -97,6 +103,22 @@ class PersetujuanController extends Controller
             $message = "Perubahan $type ditolak.";
         }
 
-        return redirect()->back()->with('success', $message);
+        // Redirect ke index jika dari halaman detail, atau back jika dari index
+        return redirect()->route('persetujuan.index')->with('success', $message);
+    }
+
+    /**
+     * Helper untuk menentukan model berdasarkan type
+     */
+    private function resolveModel($type, $id)
+    {
+        $modelClass = match ($type) {
+            'barang' => DataBarang::class,
+            'masuk', 'keluar' => Transaksi::class,
+            'return' => BarangReturn::class,
+            default => abort(404),
+        };
+
+        return $modelClass::findOrFail($id);
     }
 }

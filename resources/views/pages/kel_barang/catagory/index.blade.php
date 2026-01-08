@@ -4,24 +4,26 @@
 
 <div class="container-fluid">
 
-    <!-- JUDUL -->
     <h1 class="h3 mb-4 text-gray-800">Kategori</h1>
 
-    <!-- ALERT SUCCESS -->
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert">
-                <span>&times;</span>
-            </button>
-        </div>
+    {{-- SweetAlert Notifikasi Sukses --}}
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            });
+        </script>
     @endif
 
-    <!-- BAR ATAS -->
     <div class="card shadow mb-4">
         <div class="card-body d-flex justify-content-between flex-wrap gap-2">
 
-            <!-- KIRI -->
             <div>
                 <a href="{{ route('kel_barang.catagory.create') }}" class="btn btn-sm btn-success">
                     <i class="fas fa-plus"></i> Tambah Kategori
@@ -32,7 +34,6 @@
                 </a>
             </div>
 
-            <!-- KANAN -->
             <div>
                 <input
                     type="text"
@@ -46,7 +47,6 @@
         </div>
     </div>
 
-    <!-- TABEL -->
     <div class="card shadow">
         <div class="card-body table-responsive">
 
@@ -75,13 +75,14 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
 
-                                <form action="{{ route('kel_barang.catagory.destroy', $category->id) }}"
+                                <form id="delete-form-{{ $category->id }}" 
+                                      action="{{ route('kel_barang.catagory.destroy', $category->id) }}"
                                       method="POST"
-                                      class="d-inline"
-                                      onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
+                                      class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger">
+                                    <button type="button" class="btn btn-sm btn-danger" 
+                                            onclick="confirmDelete('{{ $category->id }}', '{{ $category->nama_category }}')">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -96,30 +97,44 @@
                         </tr>
                     @endforelse
                 </tbody>
-
             </table>
-
         </div>
     </div>
-
 </div>
 
-{{-- JS SEARCH --}}
+{{-- SCRIPT --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+// Fungsi Konfirmasi Hapus
+function confirmDelete(id, name) {
+    Swal.fire({
+        title: 'Hapus Kategori?',
+        text: "Anda akan menghapus kategori: " + name,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    });
+}
 
+document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.querySelector("[data-search]");
     const tableRows = document.querySelectorAll("tbody tr");
 
     function filterTable() {
         const searchValue = searchInput.value.toLowerCase();
-
         tableRows.forEach(row => {
             const rowText = row.innerText.toLowerCase();
             row.style.display = rowText.includes(searchValue) ? "" : "none";
         });
     }
-
     searchInput.addEventListener("input", filterTable);
 });
 </script>

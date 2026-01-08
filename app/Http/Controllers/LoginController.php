@@ -24,11 +24,12 @@ class LoginController extends Controller
 
             $user = Auth::user();
 
+            // Tambahkan ->with('login_success', true) pada setiap return redirect
             if ($user->role === 'super_admin') {
-                return redirect()->route('dashboard');
+                return redirect()->route('dashboard')->with('login_success', true);
             }
 
-            return redirect()->route('kel_barang.b_masuk.index');
+            return redirect()->route('kel_barang.b_masuk.index')->with('login_success', true);
         }
 
         return back()->withErrors([

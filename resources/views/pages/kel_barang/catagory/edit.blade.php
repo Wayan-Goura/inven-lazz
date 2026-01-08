@@ -12,9 +12,9 @@
         </div>
         <div class="card-body">
             
-            <form action="{{ route('kel_barang.catagory.update', $category->id) }}" method="POST">
+            <form id="formEditCategory" action="{{ route('kel_barang.catagory.update', $category->id) }}" method="POST">
                 @csrf
-                @method('PUT') {{-- Wajib menggunakan PUT/PATCH untuk update data --}}
+                @method('PUT')
 
                 <div class="row">
                     <div class="col-md-6">
@@ -53,7 +53,7 @@
                 <hr>
 
                 <div class="d-flex justify-content-start">
-                    <button type="submit" class="btn btn-primary mr-2">
+                    <button type="button" class="btn btn-primary mr-2" onclick="confirmUpdate()">
                         <i class="fas fa-save mr-1"></i> Update Kategori
                     </button>
                     <a href="{{ route('kel_barang.catagory.index') }}" class="btn btn-secondary">
@@ -62,9 +62,28 @@
                 </div>
 
             </form>
-            </div>
+        </div>
     </div>
-
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmUpdate() {
+    Swal.fire({
+        title: 'Update Kategori?',
+        text: "Simpan perubahan pada kategori ini?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4e73df',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Update!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('formEditCategory').submit();
+        }
+    });
+}
+</script>
 
 @endsection

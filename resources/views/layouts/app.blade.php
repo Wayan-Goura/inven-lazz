@@ -111,8 +111,65 @@
 <script src="{{ asset('sbadmin2/vendor/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('sbadmin2/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('sbadmin2/js/sb-admin-2.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- CUSTOM SIDEBAR TOGGLE -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Cek apakah halaman dimuat karena REFRESH (F5 atau tombol Reload Chrome)
+        const isRefreshed = window.performance.navigation.type === 1;
+        
+        // Cek apakah ini pertama kali LOGIN (menggunakan session dari Controller)
+        const isFirstLogin = @json(session('login_success'));
+
+        // Alert HANYA tampil jika (Admin/Super Admin) DAN (Baru Login ATAU Halaman di-Refresh)
+        @if(auth()->check() && (auth()->user()->role == 'admin' || auth()->user()->role == 'super_admin'))
+            
+            if (isFirstLogin || isRefreshed) {
+                @php
+                    $lowStockItems = DB::table('data_barangs')
+                                        ->where('jml_stok', '<', 10)
+                                        ->get(['k_barang', 'jml_stok']);
+                @endphp
+
+                @if($lowStockItems->count() > 0)
+                    let tableRows = '';
+                    @foreach($lowStockItems as $item)
+                        tableRows += `
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">{{ $item->k_barang }}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center; color: #d33; font-weight: bold;">{{ $item->jml_stok }}</td>
+                            </tr>`;
+                    @endforeach
+
+                    Swal.fire({
+                        title: '<h3 style="color: #d33; margin: 0;">🛑 PERINGATAN STOK SEDIKIT</h3>',
+                        icon: 'error', 
+                        html: `
+                            <p style="font-size: 14px; margin-bottom: 15px;">Daftar barang dengan stok di bawah 10 unit:</p>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <thead>
+                                    <tr style="background-color: #f2f2f2;">
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Kode Barang</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Sisa Stok</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        `,
+                        showCloseButton: true,
+                        confirmButtonText: 'Tutup',
+                        confirmButtonColor: '#d33',
+                        width: '500px'
+                    });
+                @endif
+            }
+        @endif
+    });
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const body = document.body;

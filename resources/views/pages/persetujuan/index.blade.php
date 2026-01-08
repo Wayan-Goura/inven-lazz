@@ -1,74 +1,94 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="tab-content mt-3">
-        @foreach (['barang', 'masuk', 'keluar', 'return'] as $type)
-            <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $type }}">
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead class="bg-light text-center">
-                            <tr>
-                                <th>Atribut</th>
-                                <th>Data Lama</th>
-                                <th>Data Baru</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{-- FIX: Cek apakah data[type] tersedia dan bisa di-loop --}}
-                            @if(isset($data[$type]) && count($data[$type]) > 0)
+<div class="container-fluid mt-3">
+    {{-- Pesan Sukses/Error Otomatis --}}
+    @if(session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2500
+            });
+        </script>
+    @endif
+
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="fw-bold">Persetujuan Perubahan Data</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="bg-light text-center">
+                        <tr>
+                            <th width="50">No</th>
+                            <th>Kode Barang</th>
+                            <th>Detail</th>
+                            <th width="200">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php $no = 1; @endphp
+                        @foreach (['barang', 'masuk', 'keluar', 'return'] as $type)
+                            @if(isset($data[$type]))
                                 @foreach ($data[$type] as $item)
-                                    <tr class="table-secondary">
-                                        <td colspan="4">
+                                    <tr class="text-center">
+                                        <td>{{ $no++ }}</td>
+                                        <td>
                                             <strong>
-                                                @if($type == 'barang')
-                                                    Barang: {{ $item->nama_barang }} ({{ $item->k_barang }})
-                                                @else
-                                                    {{-- FIX: Gunakan optional() agar tidak error jika relasi kosong --}}
-                                                    Transaksi: {{ optional($item->dataBarang)->nama_barang ?? 'N/A' }} (ID: #{{ $item->id }})
-                                                @endif
+                                                {{ ($type == 'barang') ? $item->k_barang : (optional($item->dataBarang)->k_barang ?? '-') }}
                                             </strong>
                                         </td>
-                                    </tr>
-
-                                    {{-- FIX: Cek apakah pending_perubahan adalah array sebelum di-loop --}}
-                                    @if(is_array($item->pending_perubahan))
-                                        @foreach ($item->pending_perubahan as $field => $newValue)
-                                            <tr>
-                                                <td class="text-capitalize">{{ str_replace('_', ' ', $field) }}</td>
-                                                <td>{{ $item->$field ?? '-' }}</td>
-                                                <td class="text-success fw-bold">{{ $newValue }}</td>
+                                        <td>
+                                            <a href="{{ route('persetujuan.detail', ['type' => $type, 'id' => $item->id]) }}" class="btn btn-info btn-sm text-white px-3">
+                                                <i class="fas fa-eye"></i> Detail
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <form id="form-{{ $type }}-{{ $item->id }}" action="{{ route('persetujuan.proses', ['type' => $type, 'id' => $item->id]) }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="action" id="action-{{ $type }}-{{ $item->id }}">
                                                 
-                                                @if ($loop->first)
-                                                    <td rowspan="{{ count($item->pending_perubahan) }}" class="align-middle text-center">
-                                                        <form action="{{ route('persetujuan.proses', ['type' => $type, 'id' => $item->id]) }}" method="POST">
-                                                            @csrf
-                                                            <button name="action" value="setuju" class="btn btn-success btn-sm mb-2 w-100 shadow-sm">
-                                                                <i class="fas fa-check"></i> Setuju
-                                                            </button>
-                                                            <button name="action" value="tolak" class="btn btn-danger btn-sm w-100 shadow-sm">
-                                                                <i class="fas fa-times"></i> Tolak
-                                                            </button>
-                                                        </form>
-                                                    </td>
-                                                @endif
-                                            </tr>
-                                        @endforeach
-                                    @endif
+                                                <button type="button" class="btn btn-success btn-sm" onclick="confirmAction('setuju', '{{ $type }}', '{{ $item->id }}')">Setuju</button>
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmAction('tolak', '{{ $type }}', '{{ $item->id }}')">Tolak</button>
+                                            </form>
+                                        </td>
+                                    </tr>
                                 @endforeach
-                            @else
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">
-                                        Tidak ada permintaan persetujuan untuk kategori {{ $type }}.
-                                    </td>
-                                </tr>
                             @endif
-                        </tbody>
-                    </table>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-        @endforeach
+        </div>
     </div>
 </div>
+
+<script>
+function confirmAction(action, type, id) {
+    const title = action === 'setuju' ? 'Setujui Perubahan?' : 'Tolak Perubahan?';
+    const text = action === 'setuju' ? 'Data akan segera diperbarui sesuai pengajuan.' : 'Pengajuan perubahan akan dihapus.';
+    const confirmButtonColor = action === 'setuju' ? '#198754' : '#dc3545';
+
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: confirmButtonColor,
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: action === 'setuju' ? 'Ya, Setuju!' : 'Ya, Tolak!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('action-' + type + '-' + id).value = action;
+            document.getElementById('form-' + type + '-' + id).submit();
+        }
+    });
+}
+</script>
 @endsection

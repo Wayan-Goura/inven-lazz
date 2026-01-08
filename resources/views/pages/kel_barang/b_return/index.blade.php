@@ -1,16 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
-
 <div class="container-fluid">
 
     <h1 class="h3 mb-4 text-gray-800">Barang Return</h1>
 
-    <!-- TOP BAR -->
+    {{-- Notifikasi Sukses --}}
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            });
+        </script>
+    @endif
+
     <div class="card shadow mb-4">
         <div class="card-body d-flex justify-content-between flex-wrap gap-2">
 
-            <!-- KIRI -->
             <div>
                 <a href="{{ route('kel_barang.b_return.create') }}"
                    class="btn btn-sm btn-primary">
@@ -22,7 +34,6 @@
                 </a>
             </div>
 
-            <!-- KANAN -->
             <div class="d-flex gap-2">
                 <input type="text" class="form-control form-control-sm"
                        placeholder="Cari barang..." data-search>
@@ -31,7 +42,6 @@
         </div>
     </div>
 
-    <!-- TABLE -->
     <div class="card shadow">
         <div class="card-body table-responsive">
             <table class="table table-bordered table-hover">
@@ -63,12 +73,14 @@
                             <i class="fas fa-edit"></i>
                         </a>
 
-                        <form action="{{ route('kel_barang.b_return.destroy', $return->id) }}"
-                              method="POST" class="d-inline"
-                              onsubmit="return confirm('Hapus data ini?')">
+                        {{-- Form Hapus dengan ID Unik --}}
+                        <form id="delete-form-{{ $return->id }}" 
+                              action="{{ route('kel_barang.b_return.destroy', $return->id) }}"
+                              method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-danger">
+                            <button type="button" class="btn btn-sm btn-danger" 
+                                    onclick="confirmDelete('{{ $return->id }}', '{{ $return->barang->nama_barang }}')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
@@ -76,16 +88,48 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="text-center text-muted">
+                    <td colspan="7" class="text-center text-muted">
                         Data belum tersedia
                     </td>
                 </tr>
                 @endforelse
                 </tbody>
-
             </table>
         </div>
     </div>
-
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Konfirmasi Hapus
+function confirmDelete(id, name) {
+    Swal.fire({
+        title: 'Hapus Data Return?',
+        text: "Menghapus data return barang: " + name,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74a3b',
+        cancelButtonColor: '#858796',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form-' + id).submit();
+        }
+    });
+}
+
+// Fitur Search
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.querySelector("[data-search]");
+    const tableRows = document.querySelectorAll("tbody tr");
+
+    searchInput.addEventListener("input", function() {
+        const searchValue = this.value.toLowerCase();
+        tableRows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(searchValue) ? "" : "none";
+        });
+    });
+});
+</script>
 @endsection
