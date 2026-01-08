@@ -94,8 +94,8 @@ class DashboardController extends Controller
                         SUM(CASE WHEN tipe_transaksi = 'masuk' THEN 1 ELSE 0 END) as masuk,
                         SUM(CASE WHEN tipe_transaksi = 'keluar' THEN 1 ELSE 0 END) as keluar")
             ->where('created_at', '>=', now()->subMonths(6))
-            ->groupBy('bulan')
-            ->orderBy('created_at', 'asc')
+            ->groupBy('bulan', DB::raw("MONTH(created_at)")) // Group by both
+            ->orderBy(DB::raw("MONTH(created_at)"), 'asc')
             ->get();
 
         $chartData = DB::table('detail_transaksis')
