@@ -95,7 +95,6 @@ class DataBarangController extends Controller
     {
         $barang = DataBarang::findOrFail($id);
 
-        // Tambahkan Cek: Jika bukan super_admin dan barang sedang pending, cegah update lagi
         if (auth()->user()->role !== 'super_admin' && $barang->is_disetujui) {
             return redirect()->route('barang.index')
                 ->with('error', 'Barang ini sedang menunggu persetujuan, tidak dapat diubah kembali.');
@@ -126,40 +125,23 @@ class DataBarangController extends Controller
         return redirect()->route('barang.index')->with('success', $msg);
     }
 
-    // public function persetujuan(Request $request, $id)
-    // {
-    //     // KOREKSI: Harusnya JIKA BUKAN super_admin maka abort
-    //     if (auth()->user()->role !== 'super_admin') {
-    //         abort(403);
-    //     }
-
-    //     $barang = DataBarang::findOrFail($id);
-
-    //     if ($request->action === 'setuju') {
-    //         // Ambil data dari kolom JSON (pending_perubahan)
-    //         $barang->update(array_merge($barang->pending_perubahan, [
-    //             'pending_perubahan' => null,
-    //             'is_disetujui' => false,
-    //         ]));
-    //         $msg = 'Perubahan disetujui dan diterapkan.';
-    //     } else {
-    //         $barang->update([
-    //             'pending_perubahan' => null,
-    //             'is_disetujui' => false
-    //         ]);
-    //         $msg = 'Perubahan ditolak.';
-    //     }
-
-    //     return redirect()->route('barang.index')->with('success', $msg);
-    // }   
-
     public function destroy(DataBarang $barang)
     {
-        $barang->delete();
+        $barang = DataBarang::findOrFail($barang->id);
 
-        return redirect()
-            ->route('barang.index')
-            ->with('success', 'Barang berhasil dihapus.');
+        if ($barang->is_disetujui) {
+            return redirect()->route('barang.index')
+                ->with('error', 'Barang ini sedang menunggu persetujuan, tidak dapat dihapus.');
+        }
+
+        $barang->update([
+            'pending_perubahan' => ['is_delete' => true],
+            'is_disetujui' => true,
+        ]);
+
+        return redirect()->route('barang.index')
+            ->with('success', 'Permintaan penghapusan berhasil diajukan dan menunggu persetujuan.');
+
     }
 
     public function cetak_pdf()

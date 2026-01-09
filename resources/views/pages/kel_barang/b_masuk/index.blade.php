@@ -104,9 +104,17 @@
                                 <td>{{ $detail->barang->jml_stok ?? '0' }}</td>
                                 <td>{{ $item->lokasi ?? '-' }}</td>
                                 <td class="text-center">
-                                    <a href="{{ route('transaksi.edit', $item->id) }}" class="btn btn-sm btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                            @if($item->is_disetujui)
+                                <button class="btn btn-sm btn-warning shadow-sm" 
+                                        title="Menunggu persetujuan" disabled>
+                                    <i class="fas fa-clock"></i>
+                                </button>
+                            @else
+                                <a href="{{ route('transaksi.edit', $item->id) }}"
+                                   class="btn btn-sm btn-success shadow-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            @endif
                                     
                                     <form id="delete-form-{{ $item->id }}" action="{{ route('transaksi.destroy', $item->id) }}" method="POST" class="d-inline">
                                         @csrf

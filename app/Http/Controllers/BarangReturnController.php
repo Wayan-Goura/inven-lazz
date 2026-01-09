@@ -13,7 +13,7 @@ class BarangReturnController extends Controller
 {
     public function index()
     {
-        $barangReturn = BarangReturn::with(['barang', 'category', 'user'])->latest()->get();
+        $barangReturn = BarangReturn::with(['dataBarang', 'category', 'user'])->latest()->get();
         return view('pages.kel_barang.b_return.index', compact('barangReturn'));
     }
 
@@ -57,39 +57,53 @@ class BarangReturnController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $return = BarangReturn::findOrFail($id);
+
+        if (auth()->user()->role !== 'super_admin' && $return->is_disetujui) {
+            return redirect()->route('kel_barang.b_return.index')
+                ->with('error', 'Barang ini sedang menunggu persetujuan, tidak dapat diubah kembali.');
+        }
+
+        $validated = $request->validate([
             'barang_id' => 'required|exists:data_barangs,id',
             'category_id' => 'required|exists:categories,id',
             'tanggal_return' => 'required|date',
             'jumlah_return' => 'required|integer|min:1',
             'deskripsi' => 'nullable|string',
+
         ]);
 
-        try {
-            $return = BarangReturn::findOrFail($id);
-            
-            // Lakukan update
             $return->update([
-                'barang_id' => $request->barang_id,
-                'category_id' => $request->category_id,
-                'tanggal_return' => $request->tanggal_return,
-                'jumlah_return' => $request->jumlah_return,
-                'deskripsi' => $request->deskripsi,
-                'user_id' => Auth::id() ?? $return->user_id,
+                'pending_perubahan' => $validated,
+                'is_disetujui' => true,
             ]);
-
-            return redirect()->route('kel_barang.b_return.index')->with('success', 'Catatan return berhasil diperbarui.');
-            
-        } catch (\Exception $e) {
-            return back()->withErrors(['msg' => 'Gagal mengupdate: ' . $e->getMessage()]);
-        }
+            return redirect()
+            ->route('kel_barang.b_return.index')
+            ->with('success', 'Catatan return berhasil diperbarui dan menunggu persetujuan.');
+        
     }
 
     public function destroy($id)
     {
         $return = BarangReturn::findOrFail($id);
-        $return->delete();
 
-        return redirect()->route('kel_barang.b_return.index')->with('success', 'Catatan return berhasil dihapus.');
+        // Jika sudah menunggu persetujuan, tidak boleh ajukan lagi
+        if ($return->is_disetujui) {
+            return redirect()
+                ->route('kel_barang.b_return.index')
+                ->with('error', 'Data ini sedang menunggu persetujuan.');
+        }
+
+        // AJUKAN HAPUS (BUKAN DELETE LANGSUNG)
+        $return->update([
+            'pending_perubahan' => [
+                'is_delete' => true
+            ],
+            'is_disetujui' => true,
+        ]);
+
+        return redirect()
+            ->route('kel_barang.b_return.index')
+            ->with('success', 'Permintaan penghapusan berhasil diajukan dan menunggu persetujuan.');
     }
 }

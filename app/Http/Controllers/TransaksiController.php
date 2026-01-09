@@ -37,6 +37,16 @@ class TransaksiController extends Controller
 
         return view('pages.kel_barang.b_masuk.index', compact('transaksis', 'categories'));
     }
+    //     $transaksis = Transaksi::where('tipe_transaksi', 'masuk')->get();
+
+    //     dd(
+    //         $transaksis->map(fn ($t) => [
+    //             'id' => $t->id,
+    //             'is_disetujui' => $t->is_disetujui,
+    //             'pending_perubahan' => $t->pending_perubahan,
+    //         ])
+    //     );
+    // }
 
     /* =============================
      * CREATE
@@ -102,7 +112,6 @@ class TransaksiController extends Controller
                 'tanggal_transaksi' => $request->tanggal_transaksi,
                 'user_id' => auth()->id(),
                 'tipe_transaksi' => $request->tipe_transaksi,
-                'total_barang' => $request->jumlah,
                 'lokasi' => $request->lokasi,
             ]);
 
@@ -121,8 +130,8 @@ class TransaksiController extends Controller
 
             return redirect()->route(
                 $request->tipe_transaksi === 'masuk'
-                    ? 'kel_barang.b_masuk.index'
-                    : 'kel_barang.b_keluar.index'
+                ? 'kel_barang.b_masuk.index'
+                : 'kel_barang.b_keluar.index'
             )->with('success', 'Transaksi berhasil disimpan');
 
         } catch (Exception $e) {
@@ -141,113 +150,185 @@ class TransaksiController extends Controller
         $categories = Category::all();
 
         $folder = ($transaksi->tipe_transaksi === 'masuk') ? 'b_masuk' : 'b_keluar';
-        
+
         return view("pages.kel_barang.{$folder}.edit", compact('transaksi', 'barangs', 'categories'));
     }
 
     /* =============================
      * UPDATE
      * ============================= */
+    /**
+     * UPDATE
+     * Pastikan parameter kedua dinamai $id atau menyesuaikan dengan route {barang}
+     */
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $transaksi = Transaksi::findOrFail($id);
+        $role = auth()->user()->role;
+
+        // dd([
+        //     'role' => auth()->user()->role,
+        //     'is_super_admin' => auth()->user()->role === 'super_admin',
+        // ]);
+
+        // 1. Validasi
+        $validated = $request->validate([
             'tanggal_transaksi' => 'required|date',
             'data_barang_id' => 'required|exists:data_barangs,id',
             'jumlah' => 'required|integer|min:1',
             'lokasi' => 'required|string',
         ]);
 
-        DB::beginTransaction();
-        try {
-            $transaksi = Transaksi::findOrFail($id);
-            $detail = $transaksi->detailTransaksis->first();
+        // Proteksi admin biasa
+        if ($transaksi->is_disetujui && $role !== 'super_admin') {
+            return back()->with('error', 'Transaksi ini sedang menunggu persetujuan.');
+        }
 
-            // 1. REVERT STOK LAMA
-            $barangLama = DataBarang::findOrFail($detail->data_barang_id);
-            if ($transaksi->tipe_transaksi === 'masuk') {
-                $barangLama->jml_stok -= $detail->jumlah;
-            } else {
-                $barangLama->increment('jml_stok', $detail->jumlah);
-            }
-            $barangLama->save();
+        // =========================
+        // SUPER ADMIN → LANGSUNG UPDATE
+        // =========================
+        if ($role === 'super_admin') {
+            DB::beginTransaction();
+            try {
+                // dd('STEP 1: masuk super admin');
+                $detail = $transaksi->detailTransaksis()->firstOrFail();
+                
 
-            // 2. APPLY STOK BARU
-            $barangBaru = DataBarang::findOrFail($request->data_barang_id);
-            if ($transaksi->tipe_transaksi === 'keluar' && $barangBaru->jml_stok < $request->jumlah) {
-                throw new \Exception('Stok tidak mencukupi!');
-            }
+                $barangLama = DataBarang::findOrFail($detail->data_barang_id);
+                
+                
+                if ($transaksi->tipe_transaksi === 'masuk') {
+                    $barangLama->decrement('jml_stok', $detail->jumlah);
+                } else {
+                    $barangLama->increment('jml_stok', $detail->jumlah);
+                }
 
-            if ($transaksi->tipe_transaksi === 'masuk') {
-                $barangBaru->jml_stok += $request->jumlah;
-            } else {
-                $barangBaru->jml_stok -= $request->jumlah;
-            }
-            $barangBaru->save();
+                $barangBaru = DataBarang::findOrFail($request->data_barang_id);
+                if ($transaksi->tipe_transaksi === 'keluar' && $barangBaru->jml_stok < $request->jumlah) {
+                    throw new \Exception('Stok tidak mencukupi');
+                }
 
-            // 3. UPDATE DATA TRANSAKSI UTAMA
-            $transaksi->update([
-                'tanggal_transaksi' => $request->tanggal_transaksi,
-                'total_barang' => $request->jumlah,
-                'lokasi' => $request->lokasi,
-            ]);
+                if ($transaksi->tipe_transaksi === 'masuk') {
+                    $barangBaru->increment('jml_stok', $request->jumlah);
+                } else {
+                    $barangBaru->decrement('jml_stok', $request->jumlah);
+                }
 
-            // 4. UPDATE DETAIL TRANSAKSI
-            DB::table('detail_transaksis')
-                ->where('transaksi_id', $transaksi->id)
-                ->update([
-                    'data_barang_id' => $request->data_barang_id,
-                    'jumlah' => $request->jumlah,
-                    'updated_at' => now()
+                $transaksi->update([
+                    'tanggal_transaksi' => $request->tanggal_transaksi,
+                    'lokasi' => $request->lokasi,
+                    'total_barang' => $request->jumlah, // 🔥 FIX
+                    'pending_perubahan' => null,
+                    'is_disetujui' => false,
                 ]);
 
-            DB::commit();
+                $detail->update([
+                    'data_barang_id' => $request->data_barang_id,
+                    'jumlah' => $request->jumlah,
+                ]);
 
-            $route = ($transaksi->tipe_transaksi === 'masuk') ? 'kel_barang.b_masuk.index' : 'kel_barang.b_keluar.index';
-            return redirect()->route($route)->with('success', 'Data Berhasil Diperbarui');
+                DB::commit();
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withErrors($e->getMessage())->withInput();
-        }
-    }
+                return redirect()->route(
+                    $transaksi->tipe_transaksi === 'masuk'
+                    ? 'kel_barang.b_masuk.index'
+                    : 'kel_barang.b_keluar.index'
+                )->with('success', 'Transaksi berhasil diperbarui.');
 
-    /* =============================
-     * DELETE
-     * ============================= */
-    public function destroy($id) // Harus $id sesuai route: /{id}
-{
-    DB::beginTransaction();
-    try {
-        $transaksi = Transaksi::findOrFail($id);
-        $detail = $transaksi->detailTransaksis->first();
-        
-
-        if ($detail) {
-            $barang = DataBarang::find($detail->data_barang_id);
-            if ($barang) {
-                // Kembalikan stok
-                if ($transaksi->tipe_transaksi === 'masuk') {
-                    $barang->decrement('jml_stok', $detail->jumlah);
-                } else {
-                    $barang->increment('jml_stok', $detail->jumlah);
-                }
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return back()->with('error', $e->getMessage());
             }
-            DB::table('detail_transaksis')->where('transaksi_id', $id)->delete();
         }
 
-        $tipe = $transaksi->tipe_transaksi;
-        $transaksi->delete();
 
-        DB::commit();
+        // =========================
+        // ADMIN → MASUK PENDING
+        // =========================
+        $transaksi->update([
+            'pending_perubahan' => $validated,
+            'is_disetujui' => true,
+        ]);
 
-        $route = ($tipe === 'masuk') ? 'kel_barang.b_masuk.index' : 'kel_barang.b_keluar.index';
-        return redirect()->route($route)->with('success', 'Data berhasil dihapus');
+        $route = $transaksi->tipe_transaksi === 'masuk'
+            ? 'kel_barang.b_masuk.index'
+            : 'kel_barang.b_keluar.index';
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return back()->withErrors('Gagal menghapus: ' . $e->getMessage());
+        return redirect()->route($route)
+            ->with('success', 'Perubahan telah diajukan ke Super Admin.');
     }
-}
+
+    public function destroy($id)
+    {
+        $transaksi = Transaksi::with('detailTransaksis')->findOrFail($id);
+        $role = auth()->user()->role;
+
+        // Proteksi: kalau sudah pending, admin tidak bisa hapus lagi
+        if ($transaksi->pending_perubahan && $role !== 'super_admin') {
+            return back()->with('error', 'Transaksi ini sedang menunggu persetujuan.');
+        }
+
+        /**
+         * ==================================
+         * SUPER ADMIN → LANGSUNG HAPUS
+         * ==================================
+         */
+        if ($role === 'super_admin') {
+            DB::beginTransaction();
+            try {
+                $detail = $transaksi->detailTransaksis()->first();
+
+                if ($detail) {
+                    $barang = DataBarang::findOrFail($detail->data_barang_id);
+
+                    // Kembalikan stok
+                    if ($transaksi->tipe_transaksi === 'masuk') {
+                        $barang->decrement('jml_stok', $detail->jumlah);
+                    } else {
+                        $barang->increment('jml_stok', $detail->jumlah);
+                    }
+                }
+
+                // Hapus transaksi (detail ikut terhapus via cascade)
+                $transaksi->delete();
+
+                DB::commit();
+
+                return redirect()
+                    ->route(
+                        $transaksi->tipe_transaksi === 'masuk'
+                        ? 'kel_barang.b_masuk.index'
+                        : 'kel_barang.b_keluar.index'
+                    )
+                    ->with('success', 'Transaksi berhasil dihapus.');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return back()->with('error', 'Gagal menghapus transaksi: ' . $e->getMessage());
+            }
+        }
+
+        /**
+         * ==================================
+         * ADMIN → AJUKAN PERSETUJUAN
+         * ==================================
+         */
+        $transaksi->update([
+            'pending_perubahan' => [
+                'is_delete' => true
+            ],
+            'is_disetujui' => true,
+        ]);
+
+        return redirect()
+            ->route(
+                $transaksi->tipe_transaksi === 'masuk'
+                ? 'kel_barang.b_masuk.index'
+                : 'kel_barang.b_keluar.index'
+            )
+            ->with('success', 'Permintaan penghapusan dikirim ke Super Admin.');
+    }
+
 
     /* =============================
      * CETAK PDF BARANG MASUK
