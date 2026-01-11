@@ -217,7 +217,7 @@ class TransaksiController extends Controller
                 $transaksi->update([
                     'tanggal_transaksi' => $request->tanggal_transaksi,
                     'lokasi' => $request->lokasi,
-                    'total_barang' => $request->jumlah, // 🔥 FIX
+                    'total_barang' => $request->jumlah,
                     'pending_perubahan' => null,
                     'is_disetujui' => false,
                 ]);
@@ -289,7 +289,6 @@ class TransaksiController extends Controller
                     }
                 }
 
-                // Hapus transaksi (detail ikut terhapus via cascade)
                 $transaksi->delete();
 
                 DB::commit();

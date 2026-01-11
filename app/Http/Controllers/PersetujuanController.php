@@ -111,7 +111,7 @@ class PersetujuanController extends Controller
                     }
                 }
 
-                $item->delete(); // detail ikut terhapus (cascade)
+                $item->delete();
 
                 DB::commit();
 
