@@ -88,6 +88,8 @@
     </li>
 
     <!-- persetujuan -->
+    
+    @if(auth()->user()->role === 'super_admin')
     @php
     $totalPersetujuan = \App\Models\DataBarang::where('is_disetujui', true)->count() +
                        \App\Models\Transaksi::where('is_disetujui', true)->count() +
@@ -105,6 +107,7 @@
         @endif
     </a>
 </li>
+    @endif
     
 
     <!-- KELOLA ADMIN -->

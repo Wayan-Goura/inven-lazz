@@ -255,7 +255,7 @@ class TransaksiController extends Controller
             : 'kel_barang.b_keluar.index';
 
         return redirect()->route($route)
-            ->with('success', 'Perubahan telah diajukan ke Super Admin.');
+            ->with('success', 'Perubahan data telah diajukan.');
     }
 
     public function destroy($id)
@@ -326,7 +326,7 @@ class TransaksiController extends Controller
                 ? 'kel_barang.b_masuk.index'
                 : 'kel_barang.b_keluar.index'
             )
-            ->with('success', 'Permintaan penghapusan dikirim ke Super Admin.');
+            ->with('success', 'Penghapusan data telah diajukan.');
     }
 
 

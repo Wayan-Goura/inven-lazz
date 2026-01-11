@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\DataBarang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Mpdf\Mpdf;
 
 class BarangReturnController extends Controller
 {
@@ -61,7 +62,7 @@ class BarangReturnController extends Controller
 
         if (auth()->user()->role !== 'super_admin' && $return->is_disetujui) {
             return redirect()->route('kel_barang.b_return.index')
-                ->with('error', 'Barang ini sedang menunggu persetujuan, tidak dapat diubah kembali.');
+                ->with('error', 'Persetujuan sedang diproses.');
         }
 
         $validated = $request->validate([
@@ -79,7 +80,7 @@ class BarangReturnController extends Controller
             ]);
             return redirect()
             ->route('kel_barang.b_return.index')
-            ->with('success', 'Catatan return berhasil diperbarui dan menunggu persetujuan.');
+            ->with('success', 'Perubahan data telah diajukan .');
         
     }
 
@@ -104,6 +105,30 @@ class BarangReturnController extends Controller
 
         return redirect()
             ->route('kel_barang.b_return.index')
-            ->with('success', 'Permintaan penghapusan berhasil diajukan dan menunggu persetujuan.');
+            ->with('success', 'Penghapusan data telah diajukan.');
+    }
+
+    public function cetakPDF()
+    {
+        // Ambil data yang sama dengan index
+        $barangReturn = BarangReturn::with(['dataBarang', 'category', 'user'])->latest()->get();
+        $title = "Laporan Barang Return";
+
+        // Render view ke dalam bentuk HTML string
+        $html = view('pages.kel_barang.b_return.cetak_return_pdf', compact('barangReturn', 'title'))->render();
+        // Inisialisasi mPDF
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_header' => 0,
+            'margin_footer' => 5,
+            'orientation' => 'P'
+        ]);
+
+        // Menulis HTML ke PDF
+        $mpdf->WriteHTML($html);
+
+        // Output ke browser (Inline)
+        return $mpdf->Output('Laporan_Barang_Return_' . date('YmdHis') . '.pdf', 'I');
     }
 }

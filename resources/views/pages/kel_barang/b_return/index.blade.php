@@ -28,7 +28,9 @@
                     <i class="fas fa-plus"></i> Tambah Data
                 </a>
 
-                <a href="#" class="btn btn-sm btn-secondary">
+                <a href="{{ route('kel_barang.b_return.cetak_return_pdf') }}" 
+                target="_blank" 
+                class="btn btn-sm btn-secondary shadow-sm">
                     <i class="fas fa-file-pdf"></i> Cetak PDF
                 </a>
             </div>
