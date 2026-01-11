@@ -24,8 +24,7 @@
         <div class="card-body d-flex justify-content-between flex-wrap gap-2">
 
             <div>
-                <a href="{{ route('kel_barang.b_return.create') }}"
-                   class="btn btn-sm btn-primary">
+                <a href="{{ route('kel_barang.b_return.create') }}" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus"></i> Tambah Data
                 </a>
 
@@ -34,7 +33,7 @@
                 </a>
             </div>
 
-            <div class="d-flex gap-2">
+            <div>
                 <input type="text" class="form-control form-control-sm"
                        placeholder="Cari barang..." data-search>
             </div>
@@ -46,57 +45,67 @@
         <div class="card-body table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="thead-light">
-                <tr>
-                    <th>No</th>
-                    <th>Nama</th>
-                    <th>Kategori</th>
-                    <th>Tanggal Return</th>
-                    <th>Jumlah Return</th>
-                    <th>Alasan</th>
-                    <th class="text-center">Action</th>
-                </tr>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>Kategori</th>
+                        <th>Tanggal Return</th>
+                        <th>Jumlah Return</th>
+                        <th>Alasan</th>
+                        <th class="text-center">Action</th>
+                    </tr>
                 </thead>
 
                 <tbody>
                 @forelse($barangReturn as $i => $return)
-                <tr>
-                    <td>{{ $i + 1 }}</td>
-                    <td>{{ $return->barang->nama_barang }}</td>
-                    <td>{{ $return->category->nama_category }}</td>
-                    <td>{{ $return->tanggal_return }}</td>
-                    <td class="text-center">{{ $return->jumlah_return }}</td>
-                    <td>{{ $return->deskripsi }}</td>
+                    <tr>
+                        <td>{{ $i + 1 }}</td>
+                        <td>{{ $return->dataBarang->nama_barang }}</td>
+                        <td>{{ $return->category->nama_category }}</td>
 
-                    <td class="text-center">
-                        <a href="{{ route('kel_barang.b_return.edit', $return->id) }}"
-                           class="btn btn-sm btn-warning">
-                            <i class="fas fa-edit"></i>
-                        </a>
+                        {{-- DATA ASLI (TIDAK BERUBAH SAAT PENDING) --}}
+                        <td>{{ $return->getRawOriginal('tanggal_return')}}</td>
+                        <td class="text-center">{{ $return->getRawOriginal('jumlah_return') }}</td>
+                        <td>{{ $return->getRawOriginal('deskripsi') }}</td>
 
-                        {{-- Form Hapus dengan ID Unik --}}
-                        <form id="delete-form-{{ $return->id }}" 
-                              action="{{ route('kel_barang.b_return.destroy', $return->id) }}"
-                              method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="button" class="btn btn-sm btn-danger" 
-                                    onclick="confirmDelete('{{ $return->id }}', '{{ $return->barang->nama_barang }}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
+                        <td class="text-center">
+                            @if($return->is_disetujui)
+                                <button class="btn btn-sm btn-warning shadow-sm" 
+                                        title="Menunggu persetujuan" disabled>
+                                    <i class="fas fa-clock"></i>
+                                </button>
+                            @else
+                                <a href="{{ route('kel_barang.b_return.edit', $return->id) }}"
+                                   class="btn btn-sm btn-success shadow-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            @endif
+
+                            <form id="delete-form-{{ $return->id }}" 
+                                  action="{{ route('kel_barang.b_return.destroy', $return->id) }}"
+                                  method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="confirmDelete('{{ $return->id }}', '{{ $return->dataBarang->nama_barang }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
                 @empty
-                <tr>
-                    <td colspan="7" class="text-center text-muted">
-                        Data belum tersedia
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            Data belum tersedia
+                        </td>
+                    </tr>
                 @endforelse
                 </tbody>
+
             </table>
         </div>
     </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -127,7 +136,9 @@ document.addEventListener("DOMContentLoaded", function () {
     searchInput.addEventListener("input", function() {
         const searchValue = this.value.toLowerCase();
         tableRows.forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(searchValue) ? "" : "none";
+            row.style.display = row.innerText.toLowerCase().includes(searchValue)
+                ? ""
+                : "none";
         });
     });
 });

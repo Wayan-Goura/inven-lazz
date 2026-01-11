@@ -16,16 +16,9 @@
             Schema::create('transaksis', function (Blueprint $table) {
                 $table->id();
                 $table->string('kode_transaksi', 50)->unique();
-                $table->dateTime('tanggal_transaksi');
-
-                // [PERBAIKAN WAJIB 1]: Tambahkan user_id karena diperlukan oleh controller
+                $table->date('tanggal_transaksi');
                 $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-
-                // [PERBAIKAN WAJIB 2]: Hapus category_id (Category milik Barang, bukan Transaksi Induk)
-                // $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // HAPUS
-    
                 $table->enum('tipe_transaksi', ['masuk', 'keluar']);
-                $table->integer('total_barang');
                 $table->string ('lokasi', 255);
                 $table->json('pending_perubahan')->nullable();
                 $table->boolean('is_disetujui')->default(false);

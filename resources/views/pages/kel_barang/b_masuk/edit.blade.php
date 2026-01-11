@@ -66,9 +66,11 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="font-weight-bold">Tanggal Transaksi <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_transaksi"
-                               class="form-control @error('tanggal_transaksi') is-invalid @enderror"
-                               value="{{ old('tanggal_transaksi', $transaksi->tanggal_transaksi) }}" required>
+                        {{-- Ganti baris input tanggal lama Anda dengan ini --}}
+                <input type="date" name="tanggal_transaksi"
+                    class="form-control @error('tanggal_transaksi') is-invalid @enderror"
+                    value="{{ old('tanggal_transaksi', date('Y-m-d', strtotime($transaksi->tanggal_transaksi))) }}" 
+                    required>
                     </div>
 
                     <div class="col-md-6 mb-3">

@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\DataBarang;
 use App\Models\Transaksi;
+use App\Models\DetailTransaksi;
 use App\Models\BarangReturn;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PersetujuanController extends Controller
 {
     /**
-     * Menampilkan semua daftar permintaan persetujuan (Super Admin Only)
+     * ======================
+     * DAFTAR PERSETUJUAN
+     * ======================
      */
     public function index()
     {
@@ -20,18 +24,30 @@ class PersetujuanController extends Controller
 
         $data = [
             'barang' => DataBarang::where('is_disetujui', true)->with('category')->get(),
-            'masuk'  => Transaksi::where('is_disetujui', true)->where('tipe_transaksi', 'masuk')->with('dataBarang')->get(),
-            'keluar' => Transaksi::where('is_disetujui', true)->where('tipe_transaksi', 'keluar')->with('dataBarang')->get(),
-            'return' => BarangReturn::where('is_disetujui', true)->with('dataBarang')->get(),
+            'masuk' => Transaksi::where('is_disetujui', true)
+                ->where('tipe_transaksi', 'masuk')
+                ->with('dataBarang')->get(),
+            'keluar' => Transaksi::where('is_disetujui', true)
+                ->where('tipe_transaksi', 'keluar')
+                ->with('dataBarang')->get(),
+            'return' => BarangReturn::where('is_disetujui', true)
+                ->with('dataBarang')->get(),
         ];
+        
 
-        $totalPersetujuan = $data['barang']->count() + $data['masuk']->count() + $data['keluar']->count() + $data['return']->count();
+        $totalPersetujuan =
+            $data['barang']->count() +
+            $data['masuk']->count() +
+            $data['keluar']->count() +
+            $data['return']->count();
 
         return view('pages.persetujuan.index', compact('data', 'totalPersetujuan'));
     }
 
     /**
-     * Menampilkan detail perubahan data (Data Lama vs Data Baru)
+     * ======================
+     * DETAIL PERUBAHAN
+     * ======================
      */
     public function detail($type, $id)
     {
@@ -45,7 +61,9 @@ class PersetujuanController extends Controller
     }
 
     /**
-     * Memproses Setuju atau Tolak
+     * ======================
+     * PROSES SETUJU / TOLAK
+     * ======================
      */
     public function proses(Request $request, $type, $id)
     {
@@ -54,61 +72,135 @@ class PersetujuanController extends Controller
         }
 
         $item = $this->resolveModel($type, $id);
+        $newData = $item->pending_perubahan;
 
-        if ($request->action === 'setuju') {
-            $newData = $item->pending_perubahan;
-
-            // Logika Update Stok Otomatis (Tetap sesuai aslinya)
-            if (in_array($type, ['masuk', 'keluar', 'return'])) {
-                $barang = DataBarang::find($item->data_barang_id);
-
-                if ($barang) {
-                    // 1. Undo stok lama
-                    if ($type === 'masuk') {
-                        $barang->decrement('jml_stok', $item->jumlah);
-                    } elseif ($type === 'keluar' || $type === 'return') {
-                        $barang->increment('jml_stok', $item->jumlah);
-                    }
-
-                    // 2. Terapkan stok baru
-                    if ($type === 'masuk') {
-                        $barang->increment('jml_stok', $newData['jumlah']);
-                    } elseif ($type === 'keluar' || $type === 'return') {
-                        if ($type === 'keluar' && $barang->jml_stok < $newData['jumlah']) {
-                            return back()->with('error', 'Gagal! Stok tidak mencukupi untuk menyetujui pengeluaran ini.');
-                        }
-                        $barang->decrement('jml_stok', $newData['jumlah']);
-                    }
-                }
-            }
-
-            // Cek apakah ini permintaan hapus (Delete)
-            if (isset($newData['is_delete']) && $newData['is_delete'] == true) {
-                $item->delete();
-                $message = "Data $type berhasil dihapus.";
-            } else {
-                // Terapkan update
-                $item->update(array_merge($newData, [
-                    'pending_perubahan' => null,
-                    'is_disetujui' => false,
-                ]));
-                $message = "Perubahan $type disetujui dan data telah diperbarui.";
-            }
-        } else {
-            // Jika Tolak
-            $item->update([
-                'pending_perubahan' => null,
-                'is_disetujui' => false,
-            ]);
-            $message = "Perubahan $type ditolak.";
+        if (!$newData || !is_array($newData)) {
+            return redirect()->route('persetujuan.index')
+                ->with('error', 'Data perubahan tidak ditemukan.');
         }
 
-        // Redirect ke index jika dari halaman detail, atau back jika dari index
-        return redirect()->route('persetujuan.index')->with('success', $message);
+        // ======================
+        // JIKA DITOLAK
+        // ======================
+        if ($request->action !== 'setuju') {
+            $item->update([
+                'pending_perubahan' => null,
+                'is_disetujui' => false
+            ]);
+
+            return redirect()->route('persetujuan.index')
+                ->with('error', 'Perubahan ditolak.');
+        }
+
+        // ======================
+        // JIKA PERMINTAAN DELETE
+        // ======================
+        if (!empty($newData['is_delete'])) {
+
+            DB::beginTransaction();
+            try {
+                $detail = $item->detailTransaksis()->first();
+
+                if ($detail) {
+                    $barang = DataBarang::findOrFail($detail->data_barang_id);
+
+                    if ($item->tipe_transaksi === 'masuk') {
+                        $barang->decrement('jml_stok', $detail->jumlah);
+                    } else {
+                        $barang->increment('jml_stok', $detail->jumlah);
+                    }
+                }
+
+                $item->delete(); // detail ikut terhapus (cascade)
+
+                DB::commit();
+
+                return redirect()->route('persetujuan.index')
+                    ->with('success', 'Penghapusan transaksi berhasil disetujui.');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->route('persetujuan.index')
+                    ->with('error', 'Gagal menghapus transaksi: ' . $e->getMessage());
+            }
+        }
+
+        // ======================
+        // JIKA UPDATE MASUK / KELUAR
+        // ======================
+        if (in_array($type, ['masuk', 'keluar'])) {
+
+            DB::beginTransaction();
+            try {
+                $detail = $item->detailTransaksis()->firstOrFail();
+
+                // rollback stok lama
+                $barangLama = DataBarang::findOrFail($detail->data_barang_id);
+                if ($item->tipe_transaksi === 'masuk') {
+                    $barangLama->decrement('jml_stok', $detail->jumlah);
+                } else {
+                    $barangLama->increment('jml_stok', $detail->jumlah);
+                }
+
+                $newBarangId = $newData['data_barang_id'];
+                $newJumlah = $newData['jumlah'];
+
+                // terapkan stok baru
+                $barangBaru = DataBarang::findOrFail($newBarangId);
+                if ($item->tipe_transaksi === 'keluar' && $barangBaru->jml_stok < $newJumlah) {
+                    throw new \Exception('Stok tidak mencukupi.');
+                }
+
+                if ($item->tipe_transaksi === 'masuk') {
+                    $barangBaru->increment('jml_stok', $newJumlah);
+                } else {
+                    $barangBaru->decrement('jml_stok', $newJumlah);
+                }
+
+                $item->update([
+                    'tanggal_transaksi' => substr($newData['tanggal_transaksi'], 0, 10),
+                    'lokasi' => $newData['lokasi'],
+                    'total_barang' => $newJumlah,
+                    'pending_perubahan' => null,
+                    'is_disetujui' => false,
+                ]);
+
+                $detail->update([
+                    'data_barang_id' => $newBarangId,
+                    'jumlah' => $newJumlah,
+                ]);
+
+                DB::commit();
+
+                return redirect()->route('persetujuan.index')
+                    ->with('success', 'Perubahan berhasil disetujui.');
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->route('persetujuan.index')
+                    ->with('error', $e->getMessage());
+            }
+        }
+
+        // ======================
+        // TYPE LAIN (BARANG / RETURN)
+        // ======================
+        $item->update(array_merge($newData, [
+            'pending_perubahan' => null,
+            'is_disetujui' => false,
+        ]));
+
+        return redirect()->route('persetujuan.index')
+            ->with('success', 'Berhasil diproses.');
     }
 
+
+
+
     /**
-     * Helper untuk menentukan model berdasarkan type
+     * ======================
+     * RESOLVE MODEL
+     * ======================
      */
     private function resolveModel($type, $id)
     {

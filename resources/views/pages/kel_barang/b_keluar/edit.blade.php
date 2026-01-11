@@ -8,14 +8,20 @@
         <h1 class="h3 mb-0 text-gray-800">Edit Barang Keluar</h1>
     </div>
 
-    {{-- Error Alert tetap dipertahankan dengan gaya shadow --}}
+    {{-- Tampilkan Error jika validasi gagal --}}
     @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show shadow mb-4" role="alert">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle mr-3 fa-lg"></i>
+                <div>
+                    <strong>Perhatian!</strong>
+                    <ul class="mb-0 small">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -28,8 +34,8 @@
         </div>
         <div class="card-body">
 
-            {{-- Menambahkan id="formEditKeluar" --}}
-            <form id="formEditKeluar" action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
+            {{-- FORM EDIT DENGAN ID UNTUK SWEETALERT --}}
+            <form id="formEditMasuk" action="{{ route('transaksi.update', $transaksi->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -60,9 +66,11 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="font-weight-bold">Tanggal Transaksi <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_transaksi"
-                               class="form-control @error('tanggal_transaksi') is-invalid @enderror"
-                               value="{{ old('tanggal_transaksi', $transaksi->tanggal_transaksi) }}" required>
+                        {{-- Ganti baris input tanggal lama Anda dengan ini --}}
+                <input type="date" name="tanggal_transaksi"
+                    class="form-control @error('tanggal_transaksi') is-invalid @enderror"
+                    value="{{ old('tanggal_transaksi', date('Y-m-d', strtotime($transaksi->tanggal_transaksi))) }}" 
+                    required>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -89,10 +97,10 @@
                 <hr>
 
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('kel_barang.b_keluar.index') }}" class="btn btn-secondary mr-2">
+                    <a href="{{ route('kel_barang.b_masuk.index') }}" class="btn btn-secondary mr-2">
                         <i class="fas fa-times"></i> Batal
                     </a>
-                    {{-- Ubah type submit ke button agar trigger JS --}}
+                    {{-- UBAH TYPE KE BUTTON AGAR TRIGGER SWEETALERT --}}
                     <button type="button" class="btn btn-primary" onclick="confirmUpdate()">
                         <i class="fas fa-save"></i> Simpan Perubahan
                     </button>
@@ -102,13 +110,16 @@
 
         </div>
     </div>
+
 </div>
 
-{{-- Tambahkan script SweetAlert di bawah --}}
+{{-- SCRIPT SWEETALERT --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function confirmUpdate() {
-        const form = document.getElementById('formEditKeluar');
+        const form = document.getElementById('formEditMasuk');
+        
+        // Cek validasi HTML5 (required dsb) sebelum muncul alert
         if (!form.checkValidity()) {
             form.reportValidity();
             return;
@@ -116,7 +127,7 @@
 
         Swal.fire({
             title: 'Simpan Perubahan?',
-            text: "Pastikan data transaksi sudah benar.",
+            text: "Pastikan data transaksi sudah benar sebelum disimpan.",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#4e73df',

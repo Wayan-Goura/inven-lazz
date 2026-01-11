@@ -39,7 +39,7 @@ class BarangReturn extends Model
     }
 
     // Relasi ke DataBarang (Pastikan foreign key barang_id tertulis)
-    public function barang()
+    public function dataBarang()
     {
         return $this->belongsTo(DataBarang::class, 'barang_id');
     }

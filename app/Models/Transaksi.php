@@ -18,7 +18,6 @@ class Transaksi extends Model
         'tanggal_transaksi',
         'user_id',
         'tipe_transaksi',
-        'total_barang',
         'lokasi',
         'pending_perubahan',
         'is_disetujui',
@@ -26,7 +25,6 @@ class Transaksi extends Model
 
     // Konversi tipe data
     protected $casts = [
-        'tanggal_transaksi' => 'datetime',
         'pending_perubahan' => 'array',
         'is_disetujui' => 'boolean',
     ];
@@ -55,8 +53,8 @@ class Transaksi extends Model
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    // public function dataBarang()
-    // {
-    //     return $this->belongsTo(DataBarang::class, 'data_barang_id');
-    // }
+    public function dataBarang()
+    {
+        return $this->belongsTo(DataBarang::class, 'data_barang_id');
+    }
 }
