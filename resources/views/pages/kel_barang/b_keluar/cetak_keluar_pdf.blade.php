@@ -33,17 +33,17 @@
 
     <table class="header-table">
         <tr>
-            <td><span class="brand-name">LAZZ SYSTEM</span><br><small>Inventory Outbound Report</small></td>
+            <td><span class="brand-name">Lazz Inventory</span><br><small>Inventory Outbound Report</small></td>
             <td class="report-title">Laporan Barang Keluar</td>
         </tr>
     </table>
 
     <table class="meta-table">
         <tr>
-            <td width="15%">Petugas:</td>
+            <td width="15%">Pencetak:</td>
             <td width="35%"><strong>{{ Auth::user()->name }}</strong></td>
-            <td width="15%">Status:</td>
-            <td width="35%"><span style="color:red">Outbound Authorized</span></td>
+            <td width="15%">Periode:</td>
+            <td width="35%"><strong>{{ date('d F Y') }}</strong></td>
         </tr>
     </table>
 
@@ -93,15 +93,15 @@
     </div>
 
     <div class="sig-container">
-        <p>Jakarta, {{ date('d F Y') }}</p>
+        <p>Bali, {{ date('d F Y') }}</p>
         <div style="height: 60px;"></div>
         <p><strong>( {{ Auth::user()->name }} )</strong></p>
         <hr>
-        <small>Warehouse Manager</small>
+        <small>Logistics Officer</small>
     </div>
 
     <htmlpagefooter name="page-footer">
-        <div id="page-footer">Halaman {PAGENO} dari {nbpg} - LAZZ System Outbound</div>
+        <div id="page-footer">Halaman {PAGENO} dari {nbpg} - Lazz Inventory</div>
     </htmlpagefooter>
 
 </body>

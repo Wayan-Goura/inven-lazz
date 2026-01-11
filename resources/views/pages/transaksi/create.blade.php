@@ -173,7 +173,10 @@
                                     <option value="">-- Pilih Lokasi --</option>
                                     <option value="Shopee" {{ old('lokasi') == 'Shopee' ? 'selected' : '' }}>Shopee</option>
                                     <option value="Tiktok Shop" {{ old('lokasi') == 'Tiktok Shop' ? 'selected' : '' }}>Tiktok Shop</option>
-                                    <option value="Nephew Riders" {{ old('lokasi') == 'Nephew Riders' ? 'selected' : '' }}>Nephew Riders</option>
+                                    <option value="Toko Nephew" {{ old('lokasi') == 'Toko Nephew' ? 'selected' : '' }}>Toko Nephew</option>
+                                    <option value="Toko Batubulan" {{ old('lokasi') == 'Toko Batubulan' ? 'selected' : '' }}>Toko Batubulan</option>
+                                    <option value="Toko Klungkung" {{ old('lokasi') == 'Toko Klungkung' ? 'selected' : '' }}>Toko Klungkung</option>
+                                    <option value="Gudang Klungkung" {{ old('lokasi') == 'Gudang Klungkung' ? 'selected' : '' }}>Gudang Klungkung</option>
                                 </select>
                                 @error('lokasi')
                                     <div class="invalid-feedback font-weight-bold">{{ $message }}</div>

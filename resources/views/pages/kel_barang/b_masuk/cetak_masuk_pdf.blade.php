@@ -32,7 +32,7 @@
 
     <table class="header-table">
         <tr>
-            <td><span class="brand-name">LAZZ SYSTEM</span><br><small>Inventory Inbound Report</small></td>
+            <td><span class="brand-name">Lazz Inventory</span><br><small>Inventory Inbound Report</small></td>
             <td class="report-title">Laporan Barang Masuk</td>
         </tr>
     </table>
@@ -92,7 +92,7 @@
     </div>
 
     <div class="sig-container">
-        <p>Jakarta, {{ date('d F Y') }}</p>
+        <p>Bali, {{ date('d F Y') }}</p>
         <div style="height: 60px;"></div>
         <p><strong>( {{ Auth::user()->name }} )</strong></p>
         <hr>
@@ -100,7 +100,7 @@
     </div>
 
     <htmlpagefooter name="page-footer">
-        <div id="page-footer">Halaman {PAGENO} dari {nbpg} - LAZZ System</div>
+        <div id="page-footer">Halaman {PAGENO} dari {nbpg} - Lazz Inventory</div>
     </htmlpagefooter>
 
 </body>
