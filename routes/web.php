@@ -99,6 +99,7 @@ Route::middleware('auth')->group(function () {
                 Route::get('/{id}/edit', [BarangReturnController::class, 'edit'])->name('edit');
                 Route::put('/{id}', [BarangReturnController::class, 'update'])->name('update');
                 Route::delete('/{id}', [BarangReturnController::class, 'destroy'])->name('destroy');
+                Route::get('/cetak', [BarangReturnController::class, 'cetakPDF'])->name('cetak_return_pdf');
             });
 
         // TRANSAKSI

@@ -65,7 +65,10 @@
                     <option value="">Lokasi</option>
                     <option value="Shopee">Shopee</option>
                     <option value="Tiktok Shop">Tiktok Shop</option>
-                    <option value="Nephew Riders">Nephew Riders</option>
+                    <option value="Toko Nephew">Toko Nephew</option>
+                    <option value="Toko Batubulan">Toko Batubulan</option>
+                    <option value="Toko Klungkung">Toko Klungkung</option>
+                    <option value="Gudang Klungkung">Gudang Klungkung</option>
                 </select>
             </div>
         </div>

@@ -119,7 +119,7 @@ class DataBarangController extends Controller
                 'pending_perubahan' => $validated,
                 'is_disetujui' => true
             ]);
-            $msg = 'Perubahan telah diajukan.';
+            $msg = 'Perubahan data telah diajukan.';
         }
 
         return redirect()->route('barang.index')->with('success', $msg);
@@ -140,7 +140,7 @@ class DataBarangController extends Controller
         ]);
 
         return redirect()->route('barang.index')
-            ->with('success', 'Permintaan penghapusan berhasil diajukan dan menunggu persetujuan.');
+            ->with('success', 'Penghapusan data telah diajukan.');
 
     }
 

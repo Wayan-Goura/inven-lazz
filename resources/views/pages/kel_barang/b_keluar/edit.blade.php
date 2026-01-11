@@ -78,7 +78,10 @@
                         <select name="lokasi" class="form-control @error('lokasi') is-invalid @enderror" required>
                             <option value="Shopee" {{ old('lokasi', $transaksi->lokasi) == 'Shopee' ? 'selected' : '' }}>Shopee</option>
                             <option value="Tiktok Shop" {{ old('lokasi', $transaksi->lokasi) == 'Tiktok Shop' ? 'selected' : '' }}>Tiktok Shop</option>
-                            <option value="Nephew Riders" {{ old('lokasi', $transaksi->lokasi) == 'Nephew Riders' ? 'selected' : '' }}>Nephew Riders</option>
+                            <option value="Toko Nephew" {{ old('lokasi', $transaksi->lokasi) == 'Toko Nephew' ? 'selected' : '' }}>Toko Nephew</option>
+                            <option value="Toko Batubulan" {{ old('lokasi', $transaksi->lokasi) == 'Toko Batubulan' ? 'selected' : '' }}>Toko Batubulan</option>
+                            <option value="Toko Klungkung" {{ old('lokasi', $transaksi->lokasi) == 'Toko Klungkung' ? 'selected' : '' }}>Toko Klungkung</option>
+                            <option value="Gudang Klungkung" {{ old('lokasi', $transaksi->lokasi) == 'Gudang Klungkung' ? 'selected' : '' }}>Gudang Klungkung</option>
                         </select>
                     </div>
 
