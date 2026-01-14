@@ -12,6 +12,7 @@
     <link href="{{ asset('sbadmin2/css/sb-admin-2.min.css') }}" rel="stylesheet">
 
     <!-- FIX SCROLL & LAYOUT -->
+    @stack('styles')
     <style>
         html, body {
             height: 100%;

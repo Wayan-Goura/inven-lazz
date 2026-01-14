@@ -1,4 +1,12 @@
 @extends('layouts.app')
+@push('styles')
+<style>
+.table-scroll thead th {
+    position: sticky;
+    top: 0;
+}
+</style>
+@endpush
 @section('content')
 
 <div class="container-fluid">
@@ -47,7 +55,7 @@
         </div>
 
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive overflow-auto" style="max-height: 450px">
                 <table class="table table-bordered table-hover" id="barangTable" width="100%">
                     <thead class="thead-light">
                         <tr class="text-center">
