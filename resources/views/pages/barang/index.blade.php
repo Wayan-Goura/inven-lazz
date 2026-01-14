@@ -172,7 +172,7 @@
 
     {{-- PAGINATION --}}
     <div>
-        @if($perPage !== 'all')
+        @if(request('per_page') !== 'all')
             {{ $dataBarangs->withQueryString()->links() }}
         @endif
     </div>
@@ -183,54 +183,4 @@
 </div>
 @endsection
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const searchInput   = document.querySelector("[data-search]");
-    const dateInput     = document.querySelector("[data-filter-tanggal]");
-    const categoryInput = document.getElementById("categoryFilter");
-    const resetBtn      = document.getElementById("resetFilter");
-    const rows          = document.querySelectorAll("#barangTable tbody tr");
-
-    function filterTable() {
-        const keyword   = searchInput.value.trim().toLowerCase();
-        const dateValue = dateInput.value;
-        const category  = categoryInput.value;
-
-        rows.forEach(row => {
-            const kode    = row.children[1].innerText.toLowerCase();
-            const nama    = row.children[2].innerText.toLowerCase();
-            const catId   = row.children[4].dataset.categoryId || '';
-            const rowDate = row.children[6].dataset.date || '';
-
-            let show = true;
-
-            if (keyword && !kode.includes(keyword) && !nama.includes(keyword)) {
-                show = false;
-            }
-
-            if (category && catId !== category) {
-                show = false;
-            }
-
-            if (dateValue && rowDate !== dateValue) {
-                show = false;
-            }
-
-            row.style.display = show ? "" : "none";
-        });
-    }
-
-    searchInput.addEventListener("keyup", filterTable);
-    categoryInput.addEventListener("change", filterTable);
-    dateInput.addEventListener("change", filterTable);
-
-    resetBtn.addEventListener("click", function () {
-        searchInput.value = '';
-        dateInput.value = '';
-        categoryInput.value = '';
-        filterTable();
-    });
-});
-</script>
 
