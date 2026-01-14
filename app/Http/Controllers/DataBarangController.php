@@ -10,12 +10,40 @@ use Mpdf\Mpdf;
 
 class DataBarangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $dataBarangs = DataBarang::with('category')->paginate(10);
+        $query = DataBarang::with('category')->latest();
+
+        // SEARCH (kode / nama)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('k_barang', 'like', "%{$search}%")
+                    ->orWhere('merek', 'like', "%{$search}%")
+                    ->orWhere('nama_barang', 'like', "%{$search}%");
+            });
+        }
+
+        // FILTER KATEGORI
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // FILTER TANGGAL
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        // PAGINATION
+        $perPage = $request->get('per_page', 10);
+        if ($perPage === 'all') {
+            $perPage = $query->count();
+        }
+
+        $dataBarangs = $query->paginate((int) $perPage)->withQueryString();
         $categories = Category::all();
 
-        return view('pages.barang.index', compact('dataBarangs', 'categories'));
+        return view('pages.barang.index', compact('dataBarangs', 'categories', 'perPage'));
     }
 
     public function create()
