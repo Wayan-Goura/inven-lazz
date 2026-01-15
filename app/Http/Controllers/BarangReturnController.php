@@ -12,9 +12,18 @@ use Mpdf\Mpdf;
 
 class BarangReturnController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $barangReturn = BarangReturn::with(['dataBarang', 'category', 'user'])->latest()->get();
+        
+        $barangReturn = BarangReturn::with(['dataBarang', 'category', 'user']);
+
+        $perPage = $request->get('per_page', 10);
+        if ($perPage === 'all') {
+            $perPage = $barangReturn->count();
+        }
+
+        $barangReturn = $barangReturn->paginate((int) $perPage)->withQueryString();
+
         return view('pages.kel_barang.b_return.index', compact('barangReturn'));
     }
 

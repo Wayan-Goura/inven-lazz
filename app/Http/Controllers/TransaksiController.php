@@ -9,18 +9,32 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Mpdf\Mpdf;
+use Illuminate\Pagination\AbstractPaginator;
 
 class TransaksiController extends Controller
 {
+    public function byTipe (Request $request, string $tipe)
+    {
+        
+        $perPage = $request->per_page ?? 10;
+        if ($perPage === 'all') {
+            $perPage = Transaksi::where('tipe_transaksi', $tipe)->count();
+        }
+        
+        return Transaksi::with('user', 'detailTransaksis.barang')
+            ->where('tipe_transaksi', $tipe)
+            ->paginate((int) $perPage)->withQueryString();
+       }
+
     /* =============================
      * BARANG KELUAR
      * ============================= */
-    public function b_keluar()
+    public function b_keluar(Request $request)
     {
+
         $categories = Category::all();
-        $transaksis = Transaksi::with('user', 'detailTransaksis.barang')
-            ->where('tipe_transaksi', 'keluar')
-            ->paginate(10);
+        
+        $transaksis = $this->byTipe($request, 'keluar');
 
         return view('pages.kel_barang.b_keluar.index', compact('transaksis', 'categories'));
     }
@@ -28,25 +42,14 @@ class TransaksiController extends Controller
     /* =============================
      * BARANG MASUK
      * ============================= */
-    public function b_masuk()
+    public function b_masuk(Request $request)
     {
         $categories = Category::all();
-        $transaksis = Transaksi::with('user', 'detailTransaksis.barang')
-            ->where('tipe_transaksi', 'masuk')
-            ->paginate(10);
+
+        $transaksis = $this->byTipe($request, 'masuk');
 
         return view('pages.kel_barang.b_masuk.index', compact('transaksis', 'categories'));
     }
-    //     $transaksis = Transaksi::where('tipe_transaksi', 'masuk')->get();
-
-    //     dd(
-    //         $transaksis->map(fn ($t) => [
-    //             'id' => $t->id,
-    //             'is_disetujui' => $t->is_disetujui,
-    //             'pending_perubahan' => $t->pending_perubahan,
-    //         ])
-    //     );
-    // }
 
     /* =============================
      * CREATE
@@ -192,11 +195,11 @@ class TransaksiController extends Controller
             try {
                 // dd('STEP 1: masuk super admin');
                 $detail = $transaksi->detailTransaksis()->firstOrFail();
-                
+
 
                 $barangLama = DataBarang::findOrFail($detail->data_barang_id);
-                
-                
+
+
                 if ($transaksi->tipe_transaksi === 'masuk') {
                     $barangLama->decrement('jml_stok', $detail->jumlah);
                 } else {

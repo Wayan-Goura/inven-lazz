@@ -141,35 +141,33 @@
                 </table>
             </div>
         </div>
-            <div class="card-footer bg-white d-flex justify-content-between align-items-center flex-wrap">
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center flex-wrap">
+            <div class="d-flex align-items-center mb-2 mb-md-0">
+                <small class="text-muted mr-3">
+                    @if ($dataBarangs->count() > 0)
+                        Menampilkan {{ $dataBarangs->firstItem() ?? 1 }} –
+                        {{ $dataBarangs->lastItem() ?? $dataBarangs->count() }}
+                        dari {{ $dataBarangs->total() ?? $dataBarangs->count() }} data
+                    @else
+                        Tidak ada data
+                    @endif
+                </small>
 
-    <div class="d-flex align-items-center mb-2 mb-md-0">
-        <small class="text-muted mr-3">
-            @if ($dataBarangs->count() > 0)
-                Menampilkan {{ $dataBarangs->firstItem() ?? 1 }} –
-                {{ $dataBarangs->lastItem() ?? $dataBarangs->count() }}
-                dari {{ $dataBarangs->total() ?? $dataBarangs->count() }} data
-            @else
-                Tidak ada data
-            @endif
-        </small>
+                {{-- SHOW PER PAGE --}}
+                <form method="GET">
+                    <select name="per_page"
+                            class="form-control form-control-sm"
+                            onchange="this.form.submit()">
 
-        {{-- SHOW PER PAGE --}}
-        <form method="GET">
-            <select name="per_page"
-                    class="form-control form-control-sm"
-                    onchange="this.form.submit()">
-
-                <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>
-                    Semua
-                </option>
-            </select>
-        </form>
-    </div>
-
+                        <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                        <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                        <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>
+                            Semua
+                        </option>
+                    </select>
+                </form>
+            </div>
     {{-- PAGINATION --}}
     <div>
         @if(request('per_page') !== 'all')

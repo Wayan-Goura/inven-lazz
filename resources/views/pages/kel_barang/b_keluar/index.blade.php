@@ -5,7 +5,7 @@
 <style>
     /* CSS Asli tetap dipertahankan */
     .table-scroll-container {
-        max-height: 500px;
+        max-height: 360px;
         overflow-y: auto;
         border: 1px solid #e3e6f0;
         position: relative;
@@ -118,13 +118,39 @@
                 </table>
             </div>
             
-            @if(method_exists($transaksis, 'links'))
-                <div class="mt-3">
-                    {{ $transaksis->links() }}
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 mt-3">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <small class="text-muted mr-3">
+                        @if ($transaksis->count() > 0)
+                            Menampilkan {{ $transaksis->firstItem() ?? 1 }} -
+                            {{ $transaksis->lastItem() ?? $transaksis->count() }}
+                            dari {{ $transaksis->total() ?? $transaksis->count() }} data
+                        @else
+                            Tidak ada data
+                        @endif
+                    </small>
+
+                    {{-- SHOW PER PAGE --}}
+                    <form method="GET" class="form-inline">
+                        <select name="per_page"
+                                class="form-control form-control-sm"
+                                onchange="this.form.submit()"
+                                style="width: auto;">
+                            <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                            <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                            <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                        </select>
+                    </form>
                 </div>
-            @endif
-        </div>
+                <div class="pagination-wrapper">
+                    @if(request('per_page') !== 'all')
+                        {{ $transaksis->appends(request()->input())->links() }}
+                    @endif
+                </div>
+            </div>
     </div>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

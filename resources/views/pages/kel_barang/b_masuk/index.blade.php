@@ -3,24 +3,23 @@
 @section('content')
 
 <style>
-    /* 1. Kunci container utama agar tidak ikut melar */
+    
     .container-fluid {
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 100px); /* Menyesuaikan tinggi layar dikurangi navbar */
+        height: calc(100vh - 100px);
     }
 
-    /* 2. Styling khusus untuk area scroll tabel */
+    
     .table-scroll-area {
         flex: 1;
-        overflow-y: auto; /* Paksa muncul scrollbar vertikal */
-        overflow-x: auto; /* Scroll horizontal jika layar sempit */
+        overflow-y: auto; 
+        overflow-x: auto; 
         border: 1px solid #e3e6f0;
         position: relative;
-        max-height: 65vh; /* Mengunci tinggi tabel maksimal 65% dari tinggi layar */
+        max-height: 65vh; 
     }
 
-    /* 3. Membuat Header tetap diam di atas */
     .table-scroll-area table thead th {
         position: sticky;
         top: 0;
@@ -29,7 +28,7 @@
         box-shadow: inset 0 -1px 0 #e3e6f0;
     }
 
-    /* Menghilangkan margin bawah card agar tidak double scroll */
+
     .card-body {
         padding: 1rem;
     }
@@ -133,11 +132,37 @@
                     </tbody>
                 </table>
             </div>
-            @if(method_exists($transaksis, 'links'))
-                <div class="mt-3">
-                    {{ $transaksis->links() }}
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 mt-3">
+                <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <small class="text-muted mr-3">
+                        @if ($transaksis->count() > 0)
+                            Menampilkan {{ $transaksis->firstItem() ?? 1 }} -
+                            {{ $transaksis->lastItem() ?? $transaksis->count() }}
+                            dari {{ $transaksis->total() ?? $transaksis->count() }} data
+                        @else
+                            Tidak ada data
+                        @endif
+                    </small>
+
+                    {{-- SHOW PER PAGE --}}
+                    <form method="GET" class="form-inline">
+                        <select name="per_page"
+                                class="form-control form-control-sm"
+                                onchange="this.form.submit()"
+                                style="width: auto;">
+                            <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                            <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                            <option value="all" {{ request('per_page') == 'all' ? 'selected' : '' }}>Semua</option>
+                        </select>
+                    </form>
                 </div>
-            @endif
+                <div class="pagination-wrapper">
+                    @if(request('per_page') !== 'all')
+                        {{ $transaksis->appends(request()->input())->links() }}
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 </div>
